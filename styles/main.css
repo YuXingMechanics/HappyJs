@@ -1,352 +1,211 @@
-/* 快乐学习乐园 - 主样式 */
-:root {
-    --primary: #6a5acd;
-    --secondary: #ff6b6b;
-    --accent: #4ecdc4;
-    --light: #f9f9ff;
-    --dark: #333366;
-    --success: #4CAF50;
-    --warning: #FF9800;
-    --shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-    --radius: 12px;
-    --transition: all 0.3s ease;
-}
-
+/* 快乐学习乐园 - Apple TV 风格 */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-body {
-    font-family: 'Nunito', sans-serif;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    color: var(--dark);
-    line-height: 1.6;
+html, body {
+    width: 100%;
     min-height: 100vh;
-    padding-bottom: 40px;
 }
 
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
+body {
+    font-family: 'Nunito', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    /* 柔和卡通渐变背景 */
+    background: linear-gradient(160deg, #f6d5f7 0%, #fbe9d7 25%, #e0e7ff 55%, #d4fcdf 85%, #f0fdf4 100%);
+    color: #2d3436;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-attachment: fixed;
 }
 
-/* 头部样式 */
+/* ===== 顶栏 ===== */
 header {
-    background: linear-gradient(135deg, var(--primary), #8a7fff);
-    color: white;
-    padding: 1.2rem 0;
+    width: 100%;
     text-align: center;
-    border-bottom-left-radius: var(--radius);
-    border-bottom-right-radius: var(--radius);
-    box-shadow: var(--shadow);
-    margin-bottom: 1.2rem;
+    padding: 28px 20px 10px;
+}
+
+.header-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
 }
 
 header h1 {
-    font-family: 'Comic Neue', cursive;
-    font-size: 2rem;
-    margin-bottom: 0.2rem;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    background: linear-gradient(135deg, #6c5ce7, #e17055, #fdcb6e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
-header .subtitle {
-    font-size: 1rem;
-    opacity: 0.9;
-    max-width: 500px;
-    margin: 0 auto;
-}
-
-/* 卡片网格 */
-.cards-section {
-    margin-bottom: 1.5rem;
-}
-
-/* 分类部分 */
-.category-section {
-    margin-bottom: 1.5rem;
-}
-
-.category-title {
-    font-size: 1.4rem;
-    margin-bottom: 0.8rem;
-    color: var(--dark);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding-bottom: 0.3rem;
-    border-bottom: 3px solid var(--accent);
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.6s ease, transform 0.6s ease;
-}
-
-.category-title.animate-in {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.cards-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-    gap: 12px;
-    margin-top: 0.6rem;
-}
-
-.card {
-    background: white;
-    border-radius: var(--radius);
-    overflow: hidden;
-    box-shadow: var(--shadow);
-    transition: var(--transition);
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    cursor: pointer;
-}
-
-.card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-}
-
-.card-image {
-    height: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 2.2rem;
-}
-
-.card-content {
-    padding: 0.6rem 0.8rem 0.8rem;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-.card-content h3 {
-    font-size: 1rem;
-    margin-bottom: 0.3rem;
-    color: var(--dark);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.card-content p {
-    color: #888;
-    font-size: 0.78rem;
-    margin-bottom: 0.5rem;
-    flex-grow: 1;
-    line-height: 1.4;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.card-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    margin-bottom: 0.6rem;
-}
-
-.tag {
-    background: #eef2ff;
-    color: var(--primary);
-    padding: 2px 7px;
-    border-radius: 20px;
-    font-size: 0.7rem;
+.header-desc {
+    font-size: 13px;
+    color: #636e72;
     font-weight: 600;
 }
 
-.card-button {
-    display: inline-block;
-    background: var(--accent);
-    color: white;
-    text-align: center;
-    padding: 6px 12px;
-    border-radius: 50px;
-    text-decoration: none;
-    font-weight: bold;
-    transition: var(--transition);
-    border: none;
-    cursor: pointer;
-    font-size: 0.8rem;
+/* ===== 主容器 ===== */
+main {
+    width: 100%;
+    max-width: 760px;
+    padding: 16px 20px 30px;
 }
 
-.card-button:hover {
-    background: #3db8af;
-    transform: scale(1.05);
+/* ===== 分类 ===== */
+.category {
+    margin-bottom: 24px;
 }
 
-.add-new-card .card-button {
-    background: var(--primary);
-}
-
-.add-new-card .card-button:hover {
-    background: #5949c2;
-}
-
-/* 使用说明 */
-.instructions {
-    background: white;
-    border-radius: var(--radius);
-    padding: 1.2rem;
-    box-shadow: var(--shadow);
-    margin-top: 1.5rem;
-}
-
-.instructions h2 {
-    font-size: 1.3rem;
-    margin-bottom: 0.8rem;
-    color: var(--dark);
+.cat-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: #2d3436;
     display: flex;
     align-items: center;
     gap: 8px;
+    margin-bottom: 12px;
+    padding-bottom: 6px;
+    border-bottom: 3px solid rgba(108,92,231,0.2);
 }
 
-.steps {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 1rem;
-    margin-top: 0.8rem;
+/* ===== App 行（水平滚动容器） ===== */
+.app-row {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    padding: 4px 0 8px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.app-row::-webkit-scrollbar { display: none; }
+
+/* ===== App 卡片（Apple TV 风格） ===== */
+.app-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.25s cubic-bezier(.2,0,0,1);
+    flex-shrink: 0;
+    width: 120px;
 }
 
-.step {
-    text-align: center;
-    padding: 0.8rem;
-    border-radius: var(--radius);
-    background: #f8f9ff;
-    transition: var(--transition);
+.app-card:hover {
+    transform: translateY(-6px) scale(1.02);
 }
 
-.step:hover {
-    background: #eef2ff;
-    transform: translateY(-3px);
+.app-card:active {
+    transform: scale(0.95);
 }
 
-.step-number {
-    display: inline-flex;
+/* 占位卡片不可点击 */
+.app-card.placeholder {
+    cursor: default;
+    pointer-events: none;
+}
+.app-card.placeholder:hover {
+    transform: none;
+}
+
+/* 图标方块 - 扁平圆角矩形 */
+.app-icon {
+    width: 120px;
+    height: 88px;
+    border-radius: 16px;
+    display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
-    background: var(--secondary);
-    color: white;
-    font-size: 1.2rem;
-    font-weight: bold;
-    border-radius: 50%;
-    margin-bottom: 0.5rem;
+    font-size: 32px;
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    transition: box-shadow 0.25s, transform 0.25s;
+    position: relative;
+    overflow: hidden;
 }
 
-.step h3 {
-    font-size: 1rem;
-    margin-bottom: 0.3rem;
-    color: var(--dark);
+.app-card:hover .app-icon {
+    box-shadow: 0 10px 30px rgba(0,0,0,0.18);
 }
 
-.step p {
-    color: #666;
-    font-size: 0.85rem;
+/* 占位图标 - 降低饱和度 */
+.app-card.placeholder .app-icon {
+    filter: saturate(0.5) brightness(1.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
-/* 页脚 */
-footer {
-    margin-top: 1.5rem;
+/* "即将开放" 标签 */
+.coming-soon {
+    position: absolute;
+    bottom: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    font-weight: 800;
+    color: rgba(255,255,255,0.8);
+    background: rgba(0,0,0,0.2);
+    backdrop-filter: blur(4px);
+    padding: 2px 10px;
+    border-radius: 20px;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+/* 名称 */
+.app-name {
+    margin-top: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #2d3436;
     text-align: center;
-    padding: 1rem 0;
-    color: #666;
-    border-top: 1px solid #eee;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
 }
 
-footer p {
-    margin-bottom: 0.3rem;
-    font-size: 0.85rem;
+/* 占位名称半透明 */
+.app-card.placeholder .app-name {
+    color: #b2bec3;
 }
 
-.footer-note {
-    font-size: 0.8rem;
-    color: #888;
-    max-width: 500px;
-    margin: 0 auto;
+/* ===== 页脚 ===== */
+footer {
+    text-align: center;
+    padding: 6px 20px 20px;
+    width: 100%;
+    color: #b2bec3;
+    font-size: 12px;
 }
 
-/* 响应式设计 */
-@media (max-width: 768px) {
-    header h1 {
-        font-size: 1.6rem;
-    }
-    
-    .cards-container {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: 10px;
-    }
-    
-    .steps {
-        grid-template-columns: 1fr;
-    }
+/* ===== 响应式 ===== */
+@media (max-width: 540px) {
+    header { padding: 20px 16px 8px; }
+    header h1 { font-size: 22px; }
+
+    main { padding: 12px 14px 20px; max-width: 100%; }
+
+    .category { margin-bottom: 18px; }
+    .cat-title { font-size: 14px; margin-bottom: 10px; }
+
+    .app-row { gap: 10px; }
+    .app-card { width: 100px; }
+    .app-icon { width: 100px; height: 74px; border-radius: 14px; font-size: 26px; }
+    .app-name { font-size: 11px; margin-top: 6px; }
+
+    .coming-soon { font-size: 8px; padding: 1px 8px; bottom: 4px; }
 }
 
-@media (max-width: 480px) {
-    header h1 {
-        font-size: 1.3rem;
-    }
-    
-    header .subtitle {
-        font-size: 0.85rem;
-    }
-    
-    .cards-container {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
-    }
-    
-    .card-image {
-        height: 60px;
-        font-size: 1.6rem;
-    }
-    
-    .card-content {
-        padding: 0.4rem 0.6rem 0.6rem;
-    }
-    
-    .card-content h3 {
-        font-size: 0.85rem;
-    }
-    
-    .card-content p {
-        font-size: 0.7rem;
-        -webkit-line-clamp: 1;
-    }
-    
-    .card-button {
-        padding: 4px 8px;
-        font-size: 0.7rem;
-    }
-    
-    .container {
-        padding: 0 10px;
-    }
+@media (max-width: 400px) {
+    .app-card { width: 80px; }
+    .app-icon { width: 80px; height: 60px; border-radius: 12px; font-size: 22px; }
+    .app-name { font-size: 10px; }
 }
-
-/* 动画效果 */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(12px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.fade-in {
-    animation: fadeIn 0.4s ease forwards;
-}
-
-.card {
-    opacity: 0;
-    animation: fadeIn 0.4s ease forwards;
-}
-
