@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>数字拼图 - 快乐学习乐园</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  #gameContainer {
+    position: relative;
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+
+  /* 顶部控制栏 */
+  #topBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  #topBarLeft {
+    display: flex;
+    gap: 8px;
+  }
+  #topBarRight {
+    display: flex;
+    gap: 8px;
+  }
+  #topBar button {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: none;
+    background: rgba(0,0,0,0.2);
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    opacity: 0.8;
+  }
+  #topBar button:hover { opacity: 1; background: rgba(0,0,0,0.35); transform: scale(1.08); }
+  #topBar button:active { transform: scale(0.92); }
+
+  /* 统计信息 */
+  #stats {
+    display: flex;
+    gap: 20px;
+    color: rgba(255,255,255,0.9);
+    font-size: 15px;
+    font-weight: 600;
+  }
+  #stats span {
+    background: rgba(0,0,0,0.2);
+    padding: 6px 14px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* 游戏标题 */
+  #gameTitle {
+    text-align: center;
+    color: #fff;
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 12px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    letter-spacing: 2px;
+  }
+
+  /* 拼图网格 */
+  #puzzleBoard {
+    position: relative;
+    background: rgba(0,0,0,0.2);
+    border-radius: 16px;
+    padding: 6px;
+    display: grid;
+    gap: 4px;
+    margin: 0 auto;
+    transition: width 0.3s, height 0.3s;
+  }
+
+  .tile {
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.1s ease;
+    position: relative;
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+
+  .tile:active {
+    transform: scale(0.92);
+  }
+
+  .tile-empty {
+    background: transparent !important;
+    box-shadow: none !important;
+    cursor: default;
+    pointer-events: none;
+  }
+
+  /* 胜利蒙层 */
+  #overlay {
+    display: none;
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    border-radius: 16px;
+    z-index: 10;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+  #overlay.show {
+    display: flex;
+  }
+  #overlay h2 {
+    color: #FFD700;
+    font-size: 32px;
+    text-shadow: 0 0 20px rgba(255,215,0,0.5);
+    margin-bottom: 10px;
+  }
+  #overlay p {
+    color: #fff;
+    font-size: 16px;
+    margin-bottom: 6px;
+  }
+  #overlay .btn {
+    margin-top: 16px;
+    padding: 10px 28px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(255,215,0,0.3);
+    transition: all 0.2s;
+  }
+  #overlay .btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(255,215,0,0.5);
+  }
+  #overlay .btn:active {
+    transform: scale(0.95);
+  }
+
+  /* 开始界面 */
+  #startOverlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.6);
+    border-radius: 16px;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  #startOverlay h2 {
+    color: #fff;
+    font-size: 28px;
+    margin-bottom: 8px;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  }
+  #startOverlay p {
+    color: rgba(255,255,255,0.8);
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+  #startOverlay .btn {
+    margin-top: 14px;
+    padding: 11px 32px;
+    font-size: 17px;
+    font-weight: bold;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(102,126,234,0.4);
+    transition: all 0.2s;
+  }
+  #startOverlay .btn:hover {
+    transform: scale(1.05);
+  }
+  #startOverlay .btn:active {
+    transform: scale(0.95);
+  }
+  #startOverlay .hint {
+    margin-top: 8px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+  }
+
+  /* 难度选择按钮 */
+  #sizeSelect {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  #sizeSelect button {
+    padding: 8px 18px;
+    font-size: 14px;
+    font-weight: bold;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 12px;
+    cursor: pointer;
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    transition: all 0.2s;
+  }
+  #sizeSelect button:hover {
+    background: rgba(255,255,255,0.2);
+    border-color: rgba(255,255,255,0.6);
+    transform: scale(1.05);
+  }
+  #sizeSelect button:active {
+    transform: scale(0.95);
+  }
+  #sizeSelect button.small  { border-color: #48DBFB; }
+  #sizeSelect button.medium { border-color: #FECA57; }
+  #sizeSelect button.large  { border-color: #FF6B6B; }
+
+  /* 烟花粒子 */
+  .confetti {
+    position: fixed;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  /* 响应式 */
+  @media (max-width: 400px) {
+    #gameContainer {
+      padding: 14px;
+      border-radius: 16px;
+    }
+    #puzzleBoard {
+      padding: 4px;
+    }
+    #gameTitle {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+    #stats {
+      font-size: 13px;
+      gap: 10px;
+    }
+    #stats span {
+      padding: 4px 10px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div id="gameContainer">
+  <div id="gameTitle">🧩 数字拼图</div>
+
+  <div id="topBar">
+    <div id="topBarLeft">
+      <a href="../../" style="text-decoration:none;">
+        <button title="返回首页">🏠</button>
+      </a>
+      <button id="shuffleBtn" title="重新打乱">🔀</button>
+    </div>
+    <div id="topBarRight">
+      <button id="fullscreenBtn" title="全屏">⛶</button>
+    </div>
+  </div>
+
+  <div id="stats">
+    <span>👣 <span id="moves">0</span> 步</span>
+    <span>⏱️ <span id="timer">0</span>s</span>
+  </div>
+
+  <div id="puzzleBoard">
+    <div id="overlay">
+      <h2>🎉 恭喜完成！</h2>
+      <p id="finalMoves">用时 0 步</p>
+      <p id="finalTime">耗时 0 秒</p>
+      <button class="btn" onclick="shufflePuzzle()">再来一局</button>
+    </div>
+    <div id="startOverlay">
+      <h2>🧩 数字拼图</h2>
+      <p>选择难度开始游戏</p>
+      <div id="sizeSelect">
+        <button class="small"  onclick="startGame(4)">4×4 简单</button>
+        <button class="medium" onclick="startGame(6)">6×6 中等</button>
+        <button class="large"  onclick="startGame(9)">9×9 困难</button>
+      </div>
+      <p class="hint">点击数字方块与空格交换位置</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//  数字拼图 (15-Puzzle)
+// ============================================================
+
+const boardEl = document.getElementById('puzzleBoard');
+const movesEl = document.getElementById('moves');
+const timerEl = document.getElementById('timer');
+const overlay = document.getElementById('overlay');
+const startOverlay = document.getElementById('startOverlay');
+const finalMoves = document.getElementById('finalMoves');
+const finalTime = document.getElementById('finalTime');
+const shuffleBtn = document.getElementById('shuffleBtn');
+
+// -------- 可变尺寸变量 --------
+let boardSize = 4;
+let totalTiles = 16;
+let board = [];
+let emptyIndex = totalTiles - 1;
+let moves = 0;
+let timer = 0;
+let timerInterval = null;
+let isPlaying = false;
+let isAnimating = false;
+let isStarted = false;
+
+// 根据方格尺寸计算拼图板大小和格子样式
+function updateBoardSize() {
+  const gap = boardSize <= 4 ? 4 : 3;
+  // 可用宽度 = 屏幕宽度 - 容器左右 padding(60px) - 余量(10px)
+  const availW = window.innerWidth - 70;
+  // 可用高度 = 屏幕高度 - 标题(~40px) - 顶栏(~52px) - 统计(~36px) - 容器上下 padding(60px)
+  const availH = window.innerHeight - 188;
+  // 取宽高中较小者，确保拼图板完全可见
+  const maxBoard = Math.max(Math.min(availW, availH, 520), 200);
+  const tileSize = Math.floor((maxBoard - 12 - (boardSize - 1) * gap) / boardSize);
+  const boardPx = tileSize * boardSize + (boardSize - 1) * gap + 12;
+
+  boardEl.style.width = boardPx + 'px';
+  boardEl.style.height = boardPx + 'px';
+  boardEl.style.gap = gap + 'px';
+  boardEl.style.gridTemplateColumns = `repeat(${boardSize}, 1fr)`;
+  boardEl.style.gridTemplateRows = `repeat(${boardSize}, 1fr)`;
+  boardEl.dataset.tileSize = tileSize;
+}
+
+// 根据数字生成渐变色
+function getTileColor(val) {
+  const hue = ((val - 1) / (totalTiles - 2)) * 300;
+  return `linear-gradient(135deg, hsl(${hue}, 75%, 60%), hsl(${hue + 30}, 70%, 45%))`;
+}
+
+function getTileFontSize() {
+  const ts = parseInt(boardEl.dataset.tileSize) || 72;
+  if (ts >= 65) return '28px';
+  if (ts >= 48) return '20px';
+  return '14px';
+}
+
+// -------- 音效系统 (Web Audio API) --------
+const PuzzleAudio = (() => {
+  let ctx = null;
+  function init() {
+    if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (ctx.state === 'suspended') ctx.resume();
+  }
+  function playTone(freq, duration, type, vol) {
+    if (!ctx) return;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol || 0.08, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + duration);
+  }
+  return {
+    init() { init(); },
+    slide() { init(); playTone(600, 0.06, 'sine', 0.06); },
+    victory() {
+      init();
+      const notes = [523, 659, 784, 1047];
+      notes.forEach((f, i) => setTimeout(() => playTone(f, 0.25, 'sine', 0.1), i * 100));
+    }
+  };
+})();
+
+// -------- 拼图逻辑 --------
+
+function createBoard() {
+  board = [];
+  for (let i = 1; i < totalTiles; i++) board.push(i);
+  board.push(0); // 0 = empty
+  emptyIndex = totalTiles - 1;
+}
+
+// 从已解状态执行 N 次合法移动来洗盘，保证始终可解
+function shuffleBoard() {
+  createBoard();
+  const shuffleMoves = boardSize * 40; // 4×4→160, 6×6→240, 9×9→360
+  let lastIndex = -1;
+  for (let i = 0; i < shuffleMoves; i++) {
+    const neighbors = getNeighbors(emptyIndex).filter(n => n !== lastIndex);
+    const chosen = neighbors[Math.floor(Math.random() * neighbors.length)];
+    lastIndex = emptyIndex;
+    swap(emptyIndex, chosen);
+  }
+  if (isSolved()) shuffleBoard();
+}
+
+function isSolved() {
+  for (let i = 0; i < totalTiles - 1; i++) {
+    if (board[i] !== i + 1) return false;
+  }
+  return board[totalTiles - 1] === 0;
+}
+
+function getNeighbors(index) {
+  const row = Math.floor(index / boardSize);
+  const col = index % boardSize;
+  const neighbors = [];
+  if (row > 0) neighbors.push(index - boardSize);
+  if (row < boardSize - 1) neighbors.push(index + boardSize);
+  if (col > 0) neighbors.push(index - 1);
+  if (col < boardSize - 1) neighbors.push(index + 1);
+  return neighbors;
+}
+
+function swap(i, j) {
+  [board[i], board[j]] = [board[j], board[i]];
+  if (board[i] === 0) emptyIndex = i;
+  else if (board[j] === 0) emptyIndex = j;
+}
+
+function canMove(index) {
+  if (board[index] === 0) return false;
+  return getNeighbors(index).includes(emptyIndex);
+}
+
+function moveTile(index) {
+  if (!canMove(index) || isAnimating) return false;
+  if (!isPlaying) return false;
+
+  swap(index, emptyIndex);
+  moves++;
+  movesEl.textContent = moves;
+  PuzzleAudio.slide();
+  render();
+  return true;
+}
+
+// -------- 渲染 --------
+
+function render() {
+  // 保留 overlay，只移除格子
+  boardEl.querySelectorAll('.tile').forEach(el => el.remove());
+
+  const fontSize = getTileFontSize();
+
+  board.forEach((val, idx) => {
+    const tile = document.createElement('div');
+    tile.className = 'tile';
+    if (val === 0) {
+      tile.classList.add('tile-empty');
+    } else {
+      tile.style.background = getTileColor(val);
+      tile.style.fontSize = fontSize;
+      tile.textContent = val;
+      tile.dataset.index = idx;
+    }
+    boardEl.appendChild(tile);
+  });
+
+  // 确保 overlay 始终在最后（叠在格子上层）
+  const overlayEl = document.getElementById('overlay');
+  const startOverlayEl = document.getElementById('startOverlay');
+  if (overlayEl) boardEl.appendChild(overlayEl);
+  if (startOverlayEl) boardEl.appendChild(startOverlayEl);
+}
+
+function onTileClick(index) {
+  if (moveTile(index)) {
+    if (isSolved()) {
+      onVictory();
+    }
+  }
+}
+
+// 事件委托：点击拼图板时找到被点的方块
+boardEl.addEventListener('click', (e) => {
+  const tile = e.target.closest('.tile:not(.tile-empty)');
+  if (!tile) return;
+  const index = parseInt(tile.dataset.index);
+  if (!isNaN(index)) onTileClick(index);
+});
+
+// 触摸支持
+boardEl.addEventListener('touchstart', (e) => {
+  const tile = e.target.closest('.tile:not(.tile-empty)');
+  if (!tile) return;
+  e.preventDefault();
+  const index = parseInt(tile.dataset.index);
+  if (!isNaN(index)) onTileClick(index);
+}, { passive: false });
+
+// -------- 胜利 --------
+
+function onVictory() {
+  isPlaying = false;
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+  PuzzleAudio.victory();
+
+  finalMoves.textContent = '用时 ' + moves + ' 步';
+  finalTime.textContent = '耗时 ' + timer + ' 秒（' + boardSize + '×' + boardSize + '）';
+  overlay.classList.add('show');
+
+  launchConfetti();
+}
+
+// -------- 烟花粒子效果 --------
+
+function launchConfetti() {
+  const colors = ['#FF6B6B', '#FFD700', '#48DBFB', '#FF9FF3', '#54a0ff', '#00d2d3', '#f8a5c2', '#FFA500'];
+  for (let i = 0; i < 60; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti';
+    const size = 4 + Math.random() * 6;
+    el.style.width = size + 'px';
+    el.style.height = size + 'px';
+    el.style.background = colors[Math.floor(Math.random() * colors.length)];
+    el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    el.style.left = (20 + Math.random() * 60) + 'vw';
+    el.style.top = '-10px';
+    el.style.opacity = '1';
+    document.body.appendChild(el);
+
+    const x = (Math.random() - 0.5) * 200;
+    const y = window.innerHeight * (0.4 + Math.random() * 0.6);
+    const duration = 1 + Math.random() * 2;
+
+    el.animate([
+      { transform: 'translateY(0) translateX(0) rotate(0deg)', opacity: 1 },
+      { transform: `translateY(${y}px) translateX(${x}px) rotate(${360 * (Math.random() > 0.5 ? 1 : -1)}deg)`, opacity: 0.7 }
+    ], {
+      duration: duration * 1000,
+      easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+      fill: 'forwards'
+    }).onfinish = () => el.remove();
+  }
+}
+
+// -------- 打乱 & 重置 --------
+
+function shufflePuzzle() {
+  overlay.classList.remove('show');
+  isPlaying = false;
+  isStarted = true;
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+  moves = 0;
+  timer = 0;
+  movesEl.textContent = '0';
+  timerEl.textContent = '0';
+  shuffleBoard();
+  render();
+  isPlaying = true;
+  timerInterval = setInterval(() => {
+    timer++;
+    timerEl.textContent = timer;
+  }, 1000);
+}
+
+// -------- 全屏 --------
+
+function toggleFullscreen() {
+  const el = document.documentElement;
+  if (document.fullscreenElement || document.webkitFullscreenElement) {
+    if (document.exitFullscreen) document.exitFullscreen();
+    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+  } else {
+    const r = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (r) r.call(el);
+  }
+}
+
+// -------- 键盘支持 --------
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    // Check if start overlay is visible
+    if (startOverlay.style.display !== 'none' && isStarted === false) {
+      // handled by start button
+    }
+  }
+});
+
+// -------- 开始游戏（选择难度）--------
+
+function startGame(size) {
+  PuzzleAudio.init();
+  boardSize = size;
+  totalTiles = size * size;
+  board = [];
+  emptyIndex = totalTiles - 1;
+  moves = 0;
+  timer = 0;
+  isStarted = false;
+  isPlaying = false;
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+  updateBoardSize();
+  overlay.classList.remove('show');
+  shufflePuzzle();
+  startOverlay.style.display = 'none';
+}
+
+// -------- 事件绑定 --------
+
+document.getElementById('fullscreenBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  toggleFullscreen();
+});
+
+shuffleBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  if (isStarted) {
+    shufflePuzzle();
+  }
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    if (overlay.classList.contains('show')) {
+      e.preventDefault();
+      shufflePuzzle();
+    }
+  }
+});
+
+// 窗口变化时重新适配拼图板大小
+window.addEventListener('resize', updateBoardSize);
+
+// -------- 初始化 --------
+
+boardSize = 4;
+totalTiles = 16;
+updateBoardSize();
+createBoard();
+render();
+</script>
+</body>
+</html>

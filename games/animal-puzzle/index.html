@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>拼拼图 - 快乐学习乐园</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  #gameContainer {
+    position: relative;
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 24px;
+    padding: 20px 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.2);
+    max-width: 98vw;
+    max-height: 98vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #gameTitle {
+    text-align: center;
+    color: #fff;
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    letter-spacing: 2px;
+  }
+
+  #topBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  #topBarLeft, #topBarRight {
+    display: flex;
+    gap: 6px;
+  }
+  #topBar button {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    border: none;
+    background: rgba(0,0,0,0.2);
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    opacity: 0.8;
+  }
+  #topBar button:hover { opacity: 1; background: rgba(0,0,0,0.35); transform: scale(1.08); }
+  #topBar button:active { transform: scale(0.92); }
+
+  #stats {
+    display: flex;
+    gap: 14px;
+    color: rgba(255,255,255,0.9);
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    justify-content: center;
+  }
+  #stats span {
+    background: rgba(0,0,0,0.2);
+    padding: 4px 12px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* 左侧：参考图 + 拼图框 */
+  #leftPanel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  #refImage {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    border: 2px solid rgba(255,255,255,0.4);
+    object-fit: cover;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  #refImage:hover { transform: scale(1.1); }
+  #refImage.enlarged {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) scale(1);
+    width: min(80vw, 500px);
+    height: min(80vw, 500px);
+    border-radius: 16px;
+    border: 4px solid rgba(255,255,255,0.6);
+    z-index: 200;
+    box-shadow: 0 20px 80px rgba(0,0,0,0.5);
+  }
+
+  /* 主游戏区 */
+  #gameArea {
+    display: flex;
+    gap: 12px;
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+    overflow: hidden;
+    align-items: flex-start;
+  }
+
+  /* 拼图框 */
+  #gridFrame {
+    display: grid;
+    gap: 1px;
+    background: rgba(0,0,0,0.15);
+    border-radius: 6px;
+    padding: 2px;
+    flex-shrink: 0;
+  }
+
+  .slot {
+    position: relative;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: background 0.15s;
+    overflow: hidden;
+  }
+  .slot:hover {
+    background: rgba(255,255,255,0.18);
+  }
+  .slot.filled {
+    background: transparent;
+  }
+  .slot.filled:hover {
+    background: rgba(255,80,80,0.2);
+  }
+  .slot.highlight {
+    box-shadow: inset 0 0 0 2px rgba(255,215,0,0.7);
+    background: rgba(255,215,0,0.12);
+  }
+
+  .slot img, .piece img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    pointer-events: none;
+  }
+
+  .slot .piece-num {
+    position: absolute;
+    bottom: 1px;
+    right: 2px;
+    font-size: 8px;
+    color: rgba(255,255,255,0.3);
+    pointer-events: none;
+    font-weight: bold;
+  }
+
+  /* 右侧：碎片区 */
+  #piecesPanel {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    max-height: 100%;
+  }
+
+  #piecesPanel .panel-title {
+    color: rgba(255,255,255,0.7);
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    text-align: center;
+    letter-spacing: 1px;
+  }
+
+  #piecesGrid {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    gap: 3px;
+    overflow-y: auto;
+    flex: 1;
+    background: rgba(0,0,0,0.1);
+    border-radius: 8px;
+    padding: 6px;
+    min-height: 60px;
+  }
+
+  .piece {
+    position: relative;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .piece:hover {
+    transform: scale(1.08);
+    z-index: 2;
+  }
+  .piece:active {
+    transform: scale(0.95);
+  }
+  .piece.selected {
+    box-shadow: 0 0 0 3px #FFD700, 0 0 12px rgba(255,215,0,0.5);
+    transform: scale(1.1);
+    z-index: 3;
+  }
+  .piece.placed {
+    display: none;
+  }
+
+  /* 加载 */
+  #loading {
+    text-align: center;
+    color: #fff;
+    padding: 20px;
+  }
+  #loading .spinner {
+    width: 40px; height: 40px;
+    border: 4px solid rgba(255,255,255,0.2);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 10px auto;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* 开始界面 */
+  #startOverlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.6);
+    border-radius: 24px;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  #startOverlay h2 {
+    color: #fff;
+    font-size: 26px;
+    margin-bottom: 6px;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  }
+  #startOverlay p {
+    color: rgba(255,255,255,0.8);
+    font-size: 13px;
+    margin-bottom: 2px;
+  }
+  #sizeSelect {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+    justify-content: center;
+    max-width: 340px;
+  }
+  #sizeSelect button {
+    padding: 7px 16px;
+    font-size: 13px;
+    font-weight: bold;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 10px;
+    cursor: pointer;
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    transition: all 0.2s;
+  }
+  #sizeSelect button:hover {
+    background: rgba(255,255,255,0.2);
+    border-color: rgba(255,255,255,0.6);
+    transform: scale(1.05);
+  }
+  #sizeSelect button:active { transform: scale(0.95); }
+  #sizeSelect button.s4  { border-color: #48DBFB; }
+  #sizeSelect button.s6  { border-color: #FECA57; }
+  #sizeSelect button.s9  { border-color: #FF6B6B; }
+  #sizeSelect button.s10 { border-color: #FF9FF3; }
+
+  /* 胜利蒙层 */
+  #overlay {
+    display: none;
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    border-radius: 24px;
+    z-index: 10;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+  #overlay.show { display: flex; }
+  #overlay h2 {
+    color: #FFD700;
+    font-size: 30px;
+    text-shadow: 0 0 20px rgba(255,215,0,0.5);
+    margin-bottom: 8px;
+  }
+  #overlay p {
+    color: #fff;
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+  #overlay .btn {
+    margin-top: 14px;
+    padding: 10px 28px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(255,215,0,0.3);
+    transition: all 0.2s;
+  }
+  #overlay .btn:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(255,215,0,0.5); }
+  #overlay .btn:active { transform: scale(0.95); }
+
+  /* 烟花 */
+  .confetti {
+    position: fixed;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  /* 响应式 */
+  @media (max-width: 500px) {
+    #gameContainer { padding: 10px; border-radius: 14px; }
+    #gameTitle { font-size: 16px; margin-bottom: 4px; }
+    #topBar { margin-bottom: 4px; }
+    #topBar button { width: 30px; height: 30px; font-size: 14px; }
+    #stats { font-size: 12px; margin-bottom: 4px; }
+    #stats span { padding: 3px 8px; }
+    #gameArea { gap: 6px; flex-direction: column; align-items: center; }
+    #leftPanel { flex-direction: row; gap: 8px; }
+    #refImage { width: 40px; height: 40px; }
+    #piecesPanel { max-height: none; width: 100%; }
+    #piecesGrid { max-height: 200px; }
+    #startOverlay h2 { font-size: 20px; }
+    #sizeSelect button { padding: 5px 12px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="gameContainer">
+  <div id="gameTitle">🐾 拼拼图</div>
+
+  <div id="topBar">
+    <div id="topBarLeft">
+      <a href="../../" style="text-decoration:none;"><button title="返回首页">🏠</button></a>
+      <button id="shuffleBtn" title="重新打乱">🔀</button>
+    </div>
+    <div id="topBarRight">
+      <button id="fullscreenBtn" title="全屏">⛶</button>
+    </div>
+  </div>
+
+  <div id="stats">
+    <span>🧩 <span id="placedCount">0</span> / <span id="totalCount">0</span> 块</span>
+    <span>⏱️ <span id="timer">0</span>s</span>
+  </div>
+
+  <div id="gameArea">
+    <!-- 左：参考图 + 拼图框 -->
+    <div id="leftPanel">
+      <img id="refImage" src="" alt="参考图" title="点击查看大图">
+      <div id="gridFrame"></div>
+    </div>
+
+    <!-- 右：碎片区 -->
+    <div id="piecesPanel">
+      <div class="panel-title">碎片区</div>
+      <div id="piecesGrid"></div>
+    </div>
+  </div>
+
+  <div id="overlay">
+    <h2>🎉 拼图完成！</h2>
+    <p id="finalStats">用时 0 秒</p>
+    <button class="btn" onclick="restartGame()">再来一局</button>
+  </div>
+
+  <div id="startOverlay">
+    <h2>🐾 拼拼图</h2>
+    <p>选择拼图尺寸开始</p>
+    <div id="sizeSelect">
+      <button class="s4"  onclick="startGame(4)">4×4 简单</button>
+      <button class="s6"  onclick="startGame(6)">6×6 普通</button>
+      <button class="s9"  onclick="startGame(9)">9×9 困难</button>
+      <button class="s10" onclick="startGame(10)">10×10 挑战</button>
+    </div>
+    <p style="margin-top:6px;font-size:11px;color:rgba(255,255,255,0.4);">点击碎片选中，再点击拼图框放置</p>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//  拼拼图
+// ============================================================
+
+// ------ DOM ------
+const boardEl = document.getElementById('gridFrame');
+const piecesGrid = document.getElementById('piecesGrid');
+const placedCountEl = document.getElementById('placedCount');
+const totalCountEl = document.getElementById('totalCount');
+const timerEl = document.getElementById('timer');
+const refImg = document.getElementById('refImage');
+const overlay = document.getElementById('overlay');
+const startOverlay = document.getElementById('startOverlay');
+const finalStats = document.getElementById('finalStats');
+
+// ------ 状态 ------
+let gridSize = 4;        // N×N
+let totalPieces = 16;
+let pieceSize = 80;       // 拼图框每格像素
+let thumbSize = 48;       // 碎片区每格像素
+let placed = [];          // placed[row][col] = pieceData or null
+let pieces = [];          // {id, row, col}
+let shuffledIds = [];     // 打乱后的 id 顺序
+let selectedId = -1;      // 当前选中的碎片 id
+let refImgUrl = '';
+let timer = 0;
+let timerInterval = null;
+let isPlaying = false;
+let isStarted = false;
+
+// ------ 音效 ------
+const PuzzleAudio = (() => {
+  let ctx = null;
+  function init() {
+    if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (ctx.state === 'suspended') ctx.resume();
+  }
+  function playTone(freq, duration, type, vol) {
+    if (!ctx) return;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol || 0.08, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + duration);
+  }
+  return {
+    init() { init(); },
+    place() { init(); playTone(800, 0.08, 'sine', 0.06); },
+    error() { init(); playTone(200, 0.12, 'square', 0.05); },
+    victory() {
+      init();
+      [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => playTone(f, 0.25, 'sine', 0.1), i * 100));
+    }
+  };
+})();
+
+// ------ 图片生成 ------
+
+function getAnimalImageUrl() {
+  const prompt = 'cute+watercolor+animal+illustration+colorful+woodland+creatures+flat+design+simple+clear+shapes+high+contrast';
+  return `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${prompt}&image_size=square_hd`;
+}
+
+// Canvas 后备图案（当 API 图片加载失败时使用）
+function generateFallbackImage(size) {
+  const c = document.createElement('canvas');
+  c.width = size;
+  c.height = size;
+  const ctx = c.getContext('2d');
+
+  // 渐变背景
+  const grad = ctx.createLinearGradient(0, 0, size, size);
+  grad.addColorStop(0, '#11998e');
+  grad.addColorStop(0.5, '#38ef7d');
+  grad.addColorStop(1, '#38b0ef');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, size, size);
+
+  // 动物图案（简单的小动物）
+  ctx.save();
+  // 身体
+  ctx.fillStyle = '#FFD700';
+  const cx = size/2, cy = size/2;
+  ctx.beginPath();
+  ctx.ellipse(cx, cy+5, size*0.3, size*0.22, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  // 头
+  ctx.fillStyle = '#FFA500';
+  ctx.beginPath();
+  ctx.arc(cx, cy-15, size*0.16, 0, Math.PI*2);
+  ctx.fill();
+
+  // 耳朵
+  ctx.beginPath();
+  ctx.ellipse(cx-12, cy-30, 6, 10, -0.3, 0, Math.PI*2);
+  ctx.ellipse(cx+12, cy-30, 6, 10, 0.3, 0, Math.PI*2);
+  ctx.fillStyle = '#E67E22';
+  ctx.fill();
+
+  // 眼睛
+  ctx.fillStyle = '#333';
+  ctx.beginPath();
+  ctx.arc(cx-6, cy-17, 3, 0, Math.PI*2);
+  ctx.arc(cx+6, cy-17, 3, 0, Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.arc(cx-5, cy-19, 1.2, 0, Math.PI*2);
+  ctx.arc(cx+7, cy-19, 1.2, 0, Math.PI*2);
+  ctx.fill();
+
+  // 鼻子
+  ctx.fillStyle = '#FF6B6B';
+  ctx.beginPath();
+  ctx.arc(cx, cy-12, 2.5, 0, Math.PI*2);
+  ctx.fill();
+
+  // 嘴巴
+  ctx.strokeStyle = '#333';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(cx-3, cy-10, 3, 0, Math.PI*0.5);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(cx+3, cy-10, 3, Math.PI*0.5, Math.PI);
+  ctx.stroke();
+
+  // 胡须
+  ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+  ctx.lineWidth = 1;
+  for (let side = -1; side <= 1; side += 2) {
+    for (let i = 0; i < 3; i++) {
+      ctx.beginPath();
+      ctx.moveTo(cx + side*8, cy-14 + i*4);
+      ctx.lineTo(cx + side*25, cy-18 + i*6);
+      ctx.stroke();
+    }
+  }
+
+  // 尾巴
+  ctx.strokeStyle = '#E67E22';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(cx+size*0.3, cy+5);
+  ctx.quadraticCurveTo(cx+size*0.4, cy-15, cx+size*0.35, cy-25);
+  ctx.stroke();
+
+  ctx.restore();
+
+  // 随机装饰
+  for (let i = 0; i < 15; i++) {
+    const x = Math.random() * size;
+    const y = Math.random() * size;
+    const r = 2 + Math.random() * 4;
+    ctx.fillStyle = `hsla(${Math.random()*360}, 80%, 70%, 0.4)`;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  // 底部文字
+  ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  ctx.font = `bold ${size*0.07}px sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.fillText('🐱 拼拼图', size/2, size-15);
+
+  return c.toDataURL('image/jpeg', 0.9);
+}
+
+// ------ 尺寸计算 ------
+
+function calcSizes() {
+  // 可用空间（更保守）
+  const padding = window.innerWidth <= 500 ? 16 : 32;
+  const availW = window.innerWidth - padding;
+  const overheadH = window.innerHeight <= 600 ? 110 : 150;
+  const availH = window.innerHeight - overheadH;
+
+  // 小屏幕纵向布局时，拼图框可获得更多宽度
+  const isNarrow = window.innerWidth <= 560;
+  const gridMaxW = Math.floor(isNarrow ? Math.min(availW * 0.72, 300) : Math.min(availW * 0.42, 300));
+  const gridMaxH = Math.floor(Math.min(availH * 0.72, 300));
+
+  const gap = gridSize <= 4 ? 2 : 1;
+  const maxDim = Math.min(gridMaxW, gridMaxH);
+
+  // 从较小的pieceSize开始，逐步增大直到接近maxDim
+  const minPiece = 10;
+  let bestPiece = minPiece;
+  let bestBoard = 0;
+  for (let ps = minPiece; ps <= 80; ps++) {
+    const bp = ps * gridSize + (gridSize - 1) * gap + 4;
+    if (bp <= maxDim) { bestPiece = ps; bestBoard = bp; }
+    else break;
+  }
+  pieceSize = bestPiece;
+  const boardPx = bestBoard;
+
+  // 碎片区缩略图尺寸
+  if (isNarrow) {
+    // 纵向布局：碎片区在下方，按水平剩余宽度计算
+    const thumbAreaW = Math.max(availW - 12, 60);
+    thumbSize = Math.max(Math.min(Math.floor(thumbAreaW / (gridSize * 0.5 + 2)), pieceSize * 0.55, 42), 12);
+  } else {
+    const remainW = availW - boardPx - 16;
+    const thumbAreaW = Math.max(remainW, 60);
+    thumbSize = Math.max(Math.min(Math.floor(thumbAreaW / (gridSize * 0.4 + 2)), pieceSize * 0.6, 42), 12);
+  }
+
+  return { gap, boardPx, slotSize: pieceSize };
+}
+
+function applyBoardStyle() {
+  const { gap, boardPx } = calcSizes();
+  boardEl.style.gridTemplateColumns = `repeat(${gridSize}, ${pieceSize}px)`;
+  boardEl.style.gridTemplateRows = `repeat(${gridSize}, ${pieceSize}px)`;
+  boardEl.style.gap = gap + 'px';
+  boardEl.style.width = boardPx + 'px';
+  boardEl.style.minWidth = boardPx + 'px';
+}
+
+// ------ 渲染 (overflow:hidden 裁剪方案) ------
+
+function createSliceEl(containerSize, row, col, isSlot) {
+  const el = document.createElement('div');
+  el.style.width = containerSize + 'px';
+  el.style.height = containerSize + 'px';
+  el.style.overflow = 'hidden';
+  el.style.position = 'relative';
+  el.style.borderRadius = '2px';
+
+  const img = document.createElement('img');
+  img.draggable = false;
+  img.src = refImgUrl;
+  // 图片尺寸 = 容器尺寸 × 网格数，使得一格正好显示一个切片
+  const fullSize = containerSize * gridSize;
+  img.style.width = fullSize + 'px';
+  img.style.height = fullSize + 'px';
+  img.style.position = 'absolute';
+  img.style.top = '0';
+  img.style.left = '0';
+  img.style.display = 'block';
+  // 将切片定位到正确位置
+  img.style.transform = `translate(-${col * containerSize}px, -${row * containerSize}px)`;
+  el.appendChild(img);
+  return el;
+}
+
+function renderFrame() {
+  boardEl.innerHTML = '';
+  for (let r = 0; r < gridSize; r++) {
+    for (let c = 0; c < gridSize; c++) {
+      const slot = document.createElement('div');
+      slot.className = 'slot';
+      slot.dataset.row = r;
+      slot.dataset.col = c;
+      slot.style.width = pieceSize + 'px';
+      slot.style.height = pieceSize + 'px';
+      slot.style.overflow = 'hidden';
+      slot.style.position = 'relative';
+
+      if (placed[r][c]) {
+        slot.classList.add('filled');
+        slot.appendChild(createSliceEl(pieceSize, r, c, true));
+      }
+      boardEl.appendChild(slot);
+    }
+  }
+}
+
+function renderPieces() {
+  piecesGrid.innerHTML = '';
+
+  shuffledIds.forEach(id => {
+    const p = pieces[id];
+    if (placed[p.row][p.col]) return;
+
+    const el = document.createElement('div');
+    el.className = 'piece';
+    el.dataset.id = id;
+    el.style.width = thumbSize + 'px';
+    el.style.height = thumbSize + 'px';
+    el.style.overflow = 'hidden';
+    el.style.position = 'relative';
+
+    if (id === selectedId) el.classList.add('selected');
+
+    el.appendChild(createSliceEl(thumbSize, p.row, p.col, false));
+    piecesGrid.appendChild(el);
+  });
+}
+
+function render() {
+  renderFrame();
+  renderPieces();
+  placedCountEl.textContent = countPlaced();
+  totalCountEl.textContent = totalPieces;
+}
+
+function countPlaced() {
+  let n = 0;
+  for (let r = 0; r < gridSize; r++)
+    for (let c = 0; c < gridSize; c++)
+      if (placed[r][c]) n++;
+  return n;
+}
+
+function isComplete() {
+  return countPlaced() === totalPieces;
+}
+
+// 重新打乱碎片顺序
+function shuffleIds() {
+  shuffleFisherYates(shuffledIds);
+}
+function shuffleFisherYates(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+// ------ 交互 ------
+
+function onPieceClick(id) {
+  if (!isPlaying) return;
+  if (selectedId === id) {
+    selectedId = -1;
+    renderPieces();
+    return;
+  }
+  selectedId = id;
+  renderPieces();
+}
+
+function onSlotClick(row, col) {
+  if (!isPlaying) return;
+
+  // 点击已放置的碎片 → 回收回碎片区
+  if (placed[row][col]) {
+    placed[row][col] = null;
+    PuzzleAudio.error();
+    selectedId = -1;
+    render();
+    return;
+  }
+
+  // 没有选中碎片，不操作
+  if (selectedId === -1) return;
+
+  // 将选中碎片放入这个空格（任意空格都可以放）
+  const p = pieces[selectedId];
+  placed[row][col] = p;
+  selectedId = -1;
+  PuzzleAudio.place();
+  render();
+
+  // 全部填满后检查是否完全正确
+  if (isComplete()) {
+    const wrongSlots = [];
+    for (let r = 0; r < gridSize; r++) {
+      for (let c = 0; c < gridSize; c++) {
+        const pp = placed[r][c];
+        if (pp && (pp.row !== r || pp.col !== c)) wrongSlots.push({r,c});
+      }
+    }
+    if (wrongSlots.length === 0) {
+      onVictory();
+    } else {
+      // 位置不对 → 闪红提示所有错误位置，不清空，让用户自己点击修正
+      PuzzleAudio.error();
+      const slots = boardEl.querySelectorAll('.slot');
+      wrongSlots.forEach(({r, c}) => {
+        const idx = r * gridSize + c;
+        const slot = slots[idx];
+        if (slot) {
+          slot.style.background = 'rgba(255,60,60,0.35)';
+          setTimeout(() => { slot.style.background = ''; }, 500);
+        }
+      });
+    }
+  }
+}
+
+// ------ 游戏流程 ------
+
+function loadImage(url) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject();
+    img.src = url;
+  });
+}
+
+async function startGame(size) {
+  PuzzleAudio.init();
+  startOverlay.style.display = 'none';
+  boardEl.innerHTML = '<div id="loading"><div class="spinner"></div><p>正在生成动物图片...</p></div>';
+
+  gridSize = size;
+  totalPieces = size * size;
+  timer = 0;
+  isPlaying = false;
+  isStarted = false;
+  selectedId = -1;
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+
+  overlay.classList.remove('show');
+
+  // 加载图片
+  const apiUrl = getAnimalImageUrl();
+  try {
+    await loadImage(apiUrl);
+    refImgUrl = apiUrl;
+  } catch {
+    // API 失败，用 Canvas 后备
+    const sizePx = Math.max(512, pieceSize * gridSize);
+    refImgUrl = generateFallbackImage(sizePx);
+    await loadImage(refImgUrl);
+  }
+  refImg.src = refImgUrl;
+
+  // 初始化数据
+  placed = [];
+  for (let r = 0; r < gridSize; r++) {
+    placed[r] = [];
+    for (let c = 0; c < gridSize; c++) {
+      placed[r][c] = null;
+    }
+  }
+
+  pieces = [];
+  for (let i = 0; i < totalPieces; i++) {
+    const r = Math.floor(i / gridSize);
+    const c = i % gridSize;
+    pieces.push({ id: i, row: r, col: c });
+  }
+
+  // 打乱
+  shuffledIds = pieces.map(p => p.id);
+  shuffleIds();
+
+  applyBoardStyle();
+  render();
+
+  isStarted = true;
+  isPlaying = true;
+  timer = 0;
+  timerEl.textContent = '0';
+  timerInterval = setInterval(() => {
+    timer++;
+    timerEl.textContent = timer;
+  }, 1000);
+}
+
+function restartGame() {
+  startGame(gridSize);
+}
+
+// ------ 胜利 ------
+
+function onVictory() {
+  isPlaying = false;
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  PuzzleAudio.victory();
+  finalStats.textContent = `${gridSize}×${gridSize} · 用时 ${timer} 秒`;
+  overlay.classList.add('show');
+  launchConfetti();
+}
+
+function launchConfetti() {
+  const colors = ['#FF6B6B', '#FFD700', '#48DBFB', '#FF9FF3', '#54a0ff', '#00d2d3', '#f8a5c2', '#FFA500', '#38ef7d'];
+  for (let i = 0; i < 60; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti';
+    const size = 4 + Math.random() * 6;
+    el.style.width = size + 'px';
+    el.style.height = size + 'px';
+    el.style.background = colors[Math.floor(Math.random() * colors.length)];
+    el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    el.style.left = (20 + Math.random() * 60) + 'vw';
+    el.style.top = '-10px';
+    el.style.opacity = '1';
+    document.body.appendChild(el);
+
+    const x = (Math.random() - 0.5) * 200;
+    const y = window.innerHeight * (0.4 + Math.random() * 0.6);
+    const duration = 1 + Math.random() * 2;
+
+    el.animate([
+      { transform: 'translateY(0) translateX(0) rotate(0deg)', opacity: 1 },
+      { transform: `translateY(${y}px) translateX(${x}px) rotate(${360 * (Math.random() > 0.5 ? 1 : -1)}deg)`, opacity: 0.7 }
+    ], {
+      duration: duration * 1000,
+      easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+      fill: 'forwards'
+    }).onfinish = () => el.remove();
+  }
+}
+
+// ------ 全屏 ------
+
+function toggleFullscreen() {
+  const el = document.documentElement;
+  if (document.fullscreenElement || document.webkitFullscreenElement) {
+    if (document.exitFullscreen) document.exitFullscreen();
+    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+  } else {
+    const r = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (r) r.call(el);
+  }
+}
+
+// ------ 参考图点击放大 ------
+
+refImg.addEventListener('click', () => {
+  refImg.classList.toggle('enlarged');
+  if (refImg.classList.contains('enlarged')) {
+    document.addEventListener('click', closeEnlarged);
+  }
+});
+
+function closeEnlarged(e) {
+  if (e.target !== refImg) {
+    refImg.classList.remove('enlarged');
+    document.removeEventListener('click', closeEnlarged);
+  }
+}
+
+// ------ 事件绑定（事件委托）------
+
+// 拼图框点击：事件委托在 boardEl 上
+boardEl.addEventListener('click', (e) => {
+  if (!isPlaying) return;
+  const slot = e.target.closest('.slot');
+  if (!slot) return;
+  const row = parseInt(slot.dataset.row);
+  const col = parseInt(slot.dataset.col);
+  if (isNaN(row) || isNaN(col)) return;
+  onSlotClick(row, col);
+});
+
+// 碎片区点击：事件委托在 piecesGrid 上
+piecesGrid.addEventListener('click', (e) => {
+  if (!isPlaying) return;
+  const piece = e.target.closest('.piece');
+  if (!piece) return;
+  const id = parseInt(piece.dataset.id);
+  if (isNaN(id)) return;
+  onPieceClick(id);
+});
+
+document.getElementById('fullscreenBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  toggleFullscreen();
+});
+
+document.getElementById('shuffleBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  if (isStarted) restartGame();
+});
+
+// 窗口适配（延迟执行，防止抖动）
+let resizeTimer = null;
+window.addEventListener('resize', () => {
+  if (resizeTimer) clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    if (isStarted) {
+      applyBoardStyle();
+      render();
+    }
+  }, 200);
+});
+</script>
+</body>
+</html>
