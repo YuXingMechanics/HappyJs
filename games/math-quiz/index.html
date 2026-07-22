@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数学小测验 - 快乐学习乐园</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #a29bfe, #6c5ce7);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        #gameContainer {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        #gameTitle {
+            text-align: center;
+            font-size: 28px;
+            font-weight: 800;
+            color: #6c5ce7;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        #topBar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: linear-gradient(135deg, #a29bfe, #6c5ce7);
+            border-radius: 16px;
+            color: white;
+        }
+
+        #topBarLeft {
+            display: flex;
+            gap: 10px;
+        }
+
+        #topBarLeft button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        #topBarLeft button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        #stats {
+            display: flex;
+            gap: 20px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        #startOverlay {
+            text-align: center;
+            padding: 20px;
+        }
+
+        #startOverlay h2 {
+            color: #6c5ce7;
+            font-size: 24px;
+            margin-bottom: 25px;
+        }
+
+        #difficultySelect {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        #difficultySelect button {
+            padding: 15px 20px;
+            border: none;
+            border-radius: 14px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        #difficultySelect button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .diff-easy {
+            background: linear-gradient(135deg, #1dd1a1, #10ac84);
+            color: white;
+        }
+
+        .diff-medium {
+            background: linear-gradient(135deg, #ff9ff3, #f368e0);
+            color: white;
+        }
+
+        .diff-hard {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+        }
+
+        #questionArea {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            border-radius: 20px;
+            margin-bottom: 25px;
+        }
+
+        #questionNumber {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        #questionText {
+            font-size: 48px;
+            font-weight: 800;
+            color: #2d3436;
+            margin-bottom: 20px;
+        }
+
+        #answerArea {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .answer-btn {
+            padding: 20px;
+            border: none;
+            border-radius: 16px;
+            font-size: 24px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: linear-gradient(135deg, #a29bfe, #6c5ce7);
+            color: white;
+        }
+
+        .answer-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(108, 92, 231, 0.4);
+        }
+
+        .answer-btn:active {
+            transform: translateY(0);
+        }
+
+        .answer-btn.correct {
+            background: linear-gradient(135deg, #1dd1a1, #10ac84);
+        }
+
+        .answer-btn.wrong {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+        }
+
+        #feedback {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: 700;
+            min-height: 30px;
+        }
+
+        #feedback.correct {
+            color: #1dd1a1;
+        }
+
+        #feedback.wrong {
+            color: #ff6b6b;
+        }
+
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 1000;
+        }
+
+        #overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #overlayContent {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        #overlayContent h2 {
+            color: #6c5ce7;
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        #finalStats {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.8;
+        }
+
+        #overlayContent button {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 14px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            background: linear-gradient(135deg, #a29bfe, #6c5ce7);
+            color: white;
+            transition: all 0.3s;
+        }
+
+        #overlayContent button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(108, 92, 231, 0.4);
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #ff6b6b;
+            animation: fall linear infinite;
+            z-index: 9999;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* ===== Mode Tabs ===== */
+        .mode-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 25px;
+            background: #f0f0f0;
+            border-radius: 14px;
+            padding: 4px;
+        }
+        .mode-tab {
+            flex: 1;
+            padding: 12px 10px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            background: transparent;
+            color: #888;
+            transition: all 0.3s;
+        }
+        .mode-tab.active {
+            background: white;
+            color: #6c5ce7;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .mode-tab:hover:not(.active) {
+            color: #6c5ce7;
+        }
+
+        /* ===== Mode Panels ===== */
+        .mode-panel {
+            display: none;
+        }
+        .mode-panel.active {
+            display: block;
+        }
+        .mode-panel h3 {
+            color: #6c5ce7;
+            font-size: 20px;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        /* ===== Difficulty Select (replaces #difficultySelect) ===== */
+        .diff-select {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+        .diff-select .preset-btn {
+            padding: 12px 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        .diff-select .preset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+        }
+        .diff-select .preset-btn.active {
+            outline: 3px solid #6c5ce7;
+            outline-offset: 2px;
+        }
+
+        /* ===== Setting Row ===== */
+        .setting-row {
+            margin-bottom: 18px;
+            text-align: left;
+        }
+        .setting-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 700;
+            color: #555;
+            margin-bottom: 8px;
+        }
+
+        /* ===== Preset Buttons ===== */
+        .preset-btns {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+        .preset-btn {
+            padding: 10px 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+            color: #555;
+        }
+        .preset-btn:hover {
+            border-color: #a29bfe;
+            color: #6c5ce7;
+        }
+        .preset-btn.active {
+            border-color: #6c5ce7;
+            background: #6c5ce7;
+            color: white;
+        }
+
+        /* ===== Challenge Custom Input ===== */
+        .challenge-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .challenge-input:focus {
+            border-color: #6c5ce7;
+        }
+        .challenge-input::placeholder {
+            color: #bbb;
+        }
+
+        /* ===== Start Challenge Button ===== */
+        .start-challenge-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            font-size: 20px;
+            font-weight: 800;
+            cursor: pointer;
+            background: linear-gradient(135deg, #a29bfe, #6c5ce7);
+            color: white;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        .start-challenge-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(108, 92, 231, 0.4);
+        }
+
+        /* ===== Timer Description ===== */
+        .timer-desc {
+            font-size: 16px;
+            color: #888;
+            margin: 15px 0;
+            font-weight: 500;
+        }
+
+        /* ===== Mode Label in TopBar ===== */
+        #modeLabel {
+            font-size: 14px;
+            font-weight: 600;
+            opacity: 0.9;
+        }
+
+        @media (max-width: 480px) {
+            #gameContainer {
+                padding: 20px;
+            }
+
+            #questionText {
+                font-size: 36px;
+            }
+
+            .answer-btn {
+                padding: 15px;
+                font-size: 20px;
+            }
+        }
+
+        /* ===== True/False Mode: only 2 buttons ===== */
+        #answerArea.tf-mode {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        #answerArea.tf-mode .answer-btn {
+            font-size: 28px;
+            padding: 25px 20px;
+        }
+        #answerArea.tf-mode .answer-btn:nth-child(3),
+        #answerArea.tf-mode .answer-btn:nth-child(4) {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="gameTitle">🧮 数学小测验</div>
+
+        <div id="topBar">
+            <div id="topBarLeft">
+                <button onclick="location.href='../../'">🏠</button>
+                <button onclick="restartGame()">🔄 重新开始</button>
+            </div>
+            <div id="stats">
+                <span id="modeLabel">📖 学习模式</span>
+                <span>📝 <span id="currentQ">1</span> / <span id="totalQ">10</span></span>
+                <span>✅ <span id="score">0</span></span>
+                <span>⏱️ <span id="timer">0</span>s</span>
+            </div>
+        </div>
+
+        <div id="startOverlay">
+            <div class="mode-tabs">
+                <button class="mode-tab active" data-mode="learning" onclick="switchMode('learning')">📖 学习模式</button>
+                <button class="mode-tab" data-mode="challenge" onclick="switchMode('challenge')">🏆 挑战赛</button>
+                <button class="mode-tab" data-mode="timer" onclick="switchMode('timer')">⏱️ 计时赛</button>
+            </div>
+
+            <!-- 学习模式 -->
+            <div class="mode-panel active" id="learningPanel">
+                <h3>选择难度开始学习</h3>
+                <div class="setting-row">
+                    <span class="setting-label">题型选择</span>
+                    <div class="preset-btns" id="learningCategory">
+                        <button class="preset-btn active" data-cat="arithmetic" onclick="switchCategory(this,'learning')">🧮 计算题</button>
+                        <button class="preset-btn" data-cat="word" onclick="switchCategory(this,'learning')">📝 应用题</button>
+                        <button class="preset-btn" data-cat="choice" onclick="switchCategory(this,'learning')">🎯 选择题</button>
+                        <button class="preset-btn" data-cat="truefalse" onclick="switchCategory(this,'learning')">✅ 判断题</button>
+                    </div>
+                </div>
+                <div class="diff-select">
+                    <button class="diff-easy" onclick="startGame('learning','easy')">🍭 简单</button>
+                    <button class="diff-medium" onclick="startGame('learning','medium')">🍫 普通</button>
+                    <button class="diff-hard" onclick="startGame('learning','hard')">🔥 困难</button>
+                </div>
+            </div>
+
+            <!-- 挑战赛 -->
+            <div class="mode-panel" id="challengePanel">
+                <h3>🏆 挑战赛设置</h3>
+                <div class="setting-row">
+                    <span class="setting-label">题型选择</span>
+                    <div class="preset-btns" id="challengeCategory">
+                        <button class="preset-btn active" data-cat="arithmetic" onclick="switchCategory(this,'challenge')">🧮 计算题</button>
+                        <button class="preset-btn" data-cat="word" onclick="switchCategory(this,'challenge')">📝 应用题</button>
+                        <button class="preset-btn" data-cat="choice" onclick="switchCategory(this,'challenge')">🎯 选择题</button>
+                        <button class="preset-btn" data-cat="truefalse" onclick="switchCategory(this,'challenge')">✅ 判断题</button>
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <span class="setting-label">难度选择</span>
+                    <div class="diff-select" id="challengeDiff">
+                        <button class="diff-easy preset-btn active" data-diff="easy" onclick="selectPreset(this,'challengeDiff')">简单</button>
+                        <button class="diff-medium preset-btn" data-diff="medium" onclick="selectPreset(this,'challengeDiff')">普通</button>
+                        <button class="diff-hard preset-btn" data-diff="hard" onclick="selectPreset(this,'challengeDiff')">困难</button>
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <span class="setting-label">题目数量</span>
+                    <div class="preset-btns" id="challengeCountBtns">
+                        <button class="preset-btn active" data-value="5" onclick="selectPreset(this,'challengeCount')">5题</button>
+                        <button class="preset-btn" data-value="10" onclick="selectPreset(this,'challengeCount')">10题</button>
+                        <button class="preset-btn" data-value="15" onclick="selectPreset(this,'challengeCount')">15题</button>
+                        <button class="preset-btn" data-value="20" onclick="selectPreset(this,'challengeCount')">20题</button>
+                    </div>
+                    <input type="number" class="challenge-input" id="challengeCountInput" placeholder="自定义数量" min="1" max="200" onfocus="clearPresetGroup('challengeCount')">
+                </div>
+                <div class="setting-row">
+                    <span class="setting-label">时间限制（秒）</span>
+                    <div class="preset-btns" id="challengeTimeBtns">
+                        <button class="preset-btn" data-value="30" onclick="selectPreset(this,'challengeTime')">30s</button>
+                        <button class="preset-btn active" data-value="60" onclick="selectPreset(this,'challengeTime')">60s</button>
+                        <button class="preset-btn" data-value="90" onclick="selectPreset(this,'challengeTime')">90s</button>
+                        <button class="preset-btn" data-value="120" onclick="selectPreset(this,'challengeTime')">120s</button>
+                    </div>
+                    <input type="number" class="challenge-input" id="challengeTimeInput" placeholder="自定义秒数" min="1" max="999" onfocus="clearPresetGroup('challengeTime')">
+                </div>
+                <button class="start-challenge-btn" onclick="startChallenge()">🚀 开始挑战</button>
+            </div>
+
+            <!-- 计时赛 -->
+            <div class="mode-panel" id="timerPanel">
+                <h3>⏱️ 计时赛设置</h3>
+                <div class="setting-row">
+                    <span class="setting-label">题型选择</span>
+                    <div class="preset-btns" id="timerCategory">
+                        <button class="preset-btn active" data-cat="arithmetic" onclick="switchCategory(this,'timer')">🧮 计算题</button>
+                        <button class="preset-btn" data-cat="word" onclick="switchCategory(this,'timer')">📝 应用题</button>
+                        <button class="preset-btn" data-cat="choice" onclick="switchCategory(this,'timer')">🎯 选择题</button>
+                        <button class="preset-btn" data-cat="truefalse" onclick="switchCategory(this,'timer')">✅ 判断题</button>
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <span class="setting-label">难度选择</span>
+                    <div class="diff-select" id="timerDiff">
+                        <button class="diff-easy preset-btn active" data-diff="easy" onclick="selectPreset(this,'timerDiff')">简单</button>
+                        <button class="diff-medium preset-btn" data-diff="medium" onclick="selectPreset(this,'timerDiff')">普通</button>
+                        <button class="diff-hard preset-btn" data-diff="hard" onclick="selectPreset(this,'timerDiff')">困难</button>
+                    </div>
+                </div>
+                <p class="timer-desc">尽可能快地答题！</p>
+                <button class="start-challenge-btn" onclick="startTimerRace()">⏱️ 开始计时赛</button>
+            </div>
+        </div>
+
+        <div id="quizArea" style="display: none;">
+            <div id="questionArea">
+                <div id="questionNumber">第 1 题</div>
+                <div id="questionText">2 + 3 = ?</div>
+            </div>
+            <div id="answerArea">
+                <button class="answer-btn" onclick="checkAnswer(0)">1</button>
+                <button class="answer-btn" onclick="checkAnswer(1)">5</button>
+                <button class="answer-btn" onclick="checkAnswer(2)">4</button>
+                <button class="answer-btn" onclick="checkAnswer(3)">6</button>
+            </div>
+            <div id="feedback"></div>
+        </div>
+    </div>
+
+    <div id="overlay">
+        <div id="overlayContent">
+            <h2 id="overlayTitle">🎉 挑战完成！</h2>
+            <div id="finalStats"></div>
+            <button onclick="goToStart()">🔄 再来一次</button>
+        </div>
+    </div>
+
+    <script>
+        // ===== DOM Elements =====
+        const startOverlay = document.getElementById('startOverlay');
+        const quizArea = document.getElementById('quizArea');
+        const questionText = document.getElementById('questionText');
+        const questionNumber = document.getElementById('questionNumber');
+        const answerButtons = document.querySelectorAll('.answer-btn');
+        const answerArea = document.getElementById('answerArea');
+        const feedback = document.getElementById('feedback');
+        const currentQEl = document.getElementById('currentQ');
+        const totalQEl = document.getElementById('totalQ');
+        const scoreEl = document.getElementById('score');
+        const timerEl = document.getElementById('timer');
+        const modeLabel = document.getElementById('modeLabel');
+        const overlay = document.getElementById('overlay');
+        const overlayTitle = document.getElementById('overlayTitle');
+        const finalStats = document.getElementById('finalStats');
+        const modeTabs = document.querySelectorAll('.mode-tab');
+        const panels = {
+            learning: document.getElementById('learningPanel'),
+            challenge: document.getElementById('challengePanel'),
+            timer: document.getElementById('timerPanel')
+        };
+
+        // ===== State =====
+        let currentMode = 'learning';   // 'learning' | 'challenge' | 'timer'
+        let currentQIndex = 0;
+        let score = 0;
+        let timer = 0;                  // elapsed (learning/timer) or remaining (challenge)
+        let timerInterval = null;
+        let timerDirection = 1;         // 1 = count up, -1 = count down
+        let difficulty = 'easy';
+        let currentAnswer = 0;
+        let isPlaying = false;
+        let preGenQuestions = [];
+        let totalQuestions = 10;
+        let timeLimit = 0;              // for challenge mode
+        let challengeEnded = false;     // prevent double-end from timer + answer
+        let currentCategory = 'arithmetic'; // 'arithmetic' | 'word' | 'choice' | 'truefalse'
+
+        const diffNames = {
+            easy: '简单',
+            medium: '普通',
+            hard: '困难'
+        };
+
+        const modeNames = {
+            learning: '📖 学习模式',
+            challenge: '🏆 挑战赛',
+            timer: '⏱️ 计时赛'
+        };
+
+        // ===== Question Bank for Static Categories =====
+        const questionBank = {
+            word: [
+                // 简单 (diff:1) - 10以内加减法应用题
+                { text: '小明有3个苹果，妈妈又给了他2个，一共有几个苹果？', opts: ['3', '5', '6', '4'], ans: 1, diff: 1 },
+                { text: '树上有5只鸟，飞走了2只，还剩几只？', opts: ['2', '3', '4', '1'], ans: 1, diff: 1 },
+                { text: '小红有4块糖，吃了1块，还剩几块？', opts: ['2', '3', '5', '1'], ans: 1, diff: 1 },
+                { text: '草地上有3只白兔和2只灰兔，一共有几只兔子？', opts: ['4', '6', '5', '3'], ans: 2, diff: 1 },
+                { text: '鱼缸里有6条鱼，捞走了1条，还剩几条？', opts: ['7', '4', '5', '6'], ans: 2, diff: 1 },
+                { text: '小明有2支铅笔，妈妈给了他3支，小明现在有几支？', opts: ['4', '6', '3', '5'], ans: 3, diff: 1 },
+                { text: '停车场有4辆车，又来了2辆，现在有几辆？', opts: ['5', '7', '6', '4'], ans: 2, diff: 1 },
+                { text: '小华折了5只纸鹤，送给同学2只，还剩几只？', opts: ['2', '4', '3', '6'], ans: 2, diff: 1 },
+                { text: '盘子里有7个苹果，吃掉3个，还剩几个？', opts: ['3', '5', '4', '6'], ans: 2, diff: 1 },
+                { text: '花园里有8朵红花和2朵黄花，一共有几朵花？', opts: ['9', '11', '8', '10'], ans: 3, diff: 1 },
+                // 普通 (diff:2) - 20以内加减法应用题
+                { text: '小明有12张贴纸，送给好朋友5张，还剩几张？', opts: ['6', '8', '7', '9'], ans: 2, diff: 2 },
+                { text: '公交车上原来有8人，又上来7人，现在有几人？', opts: ['14', '13', '16', '15'], ans: 3, diff: 2 },
+                { text: '小红有15元钱，买文具花了8元，还剩几元？', opts: ['6', '8', '7', '9'], ans: 2, diff: 2 },
+                { text: '停车场有9辆车，又来了6辆，现在一共有几辆？', opts: ['16', '14', '13', '15'], ans: 3, diff: 2 },
+                { text: '第一行有11棵树，第二行有8棵树，一共有几棵？', opts: ['18', '20', '19', '17'], ans: 2, diff: 2 },
+                { text: '小明做了13道题，做对了9道，做错了几道？', opts: ['5', '3', '4', '6'], ans: 2, diff: 2 },
+                { text: '书架上有18本书，借出去9本，还剩几本？', opts: ['8', '10', '7', '9'], ans: 3, diff: 2 },
+                { text: '一箱牛奶有12瓶，喝掉了4瓶，还剩几瓶？', opts: ['9', '7', '8', '6'], ans: 2, diff: 2 },
+                { text: '合唱队有20人，男生有8人，女生有几人？', opts: ['11', '13', '10', '12'], ans: 3, diff: 2 },
+                { text: '妈妈买了16个鸡蛋，破了3个，好的有几个？', opts: ['12', '14', '13', '11'], ans: 2, diff: 2 },
+                // 困难 (diff:3) - 乘除法/多步应用题
+                { text: '每排有6个座位，3排共有几个座位？', opts: ['16', '20', '18', '15'], ans: 2, diff: 3 },
+                { text: '有12个同学，平均分成3组，每组有几人？', opts: ['3', '5', '6', '4'], ans: 3, diff: 3 },
+                { text: '一盒彩笔有5支，买了4盒共有几支？', opts: ['15', '25', '24', '20'], ans: 3, diff: 3 },
+                { text: '有20个苹果，每5个装一盘，可以装几盘？', opts: ['3', '5', '6', '4'], ans: 3, diff: 3 },
+                { text: '小明每天读7页书，读了一周（7天），共读几页？', opts: ['42', '56', '49', '45'], ans: 2, diff: 3 },
+                { text: '每辆车坐4个人，3辆车可以坐几个人？', opts: ['10', '14', '8', '12'], ans: 3, diff: 3 },
+                { text: '有15个气球，平均分给5个小朋友，每人几个？', opts: ['2', '4', '5', '3'], ans: 3, diff: 3 },
+                { text: '一支笔4元，买3支需要多少钱？', opts: ['10', '14', '8', '12'], ans: 3, diff: 3 },
+                { text: '一根绳子长18米，剪成3米一段，可以剪几段？', opts: ['5', '7', '4', '6'], ans: 3, diff: 3 },
+                { text: '小红每天写2页字，写了8天，一共写了几页？', opts: ['10', '18', '14', '16'], ans: 3, diff: 3 },
+            ],
+            choice: [
+                // 简单 (diff:1)
+                { text: '下面哪个数字最大？', opts: ['3', '5', '2', '4'], ans: 1, diff: 1 },
+                { text: '1个十是几？', opts: ['1', '10', '100', '0'], ans: 1, diff: 1 },
+                { text: '下面哪个是单数？', opts: ['2', '4', '3', '6'], ans: 2, diff: 1 },
+                { text: '2后面的第3个数是几？', opts: ['3', '4', '5', '6'], ans: 2, diff: 1 },
+                { text: '比5大比7小的数是几？', opts: ['4', '5', '6', '8'], ans: 2, diff: 1 },
+                { text: '下面哪个是双数？', opts: ['1', '3', '5', '8'], ans: 3, diff: 1 },
+                { text: '一个星期有几天？', opts: ['5', '6', '7', '8'], ans: 2, diff: 1 },
+                { text: '下面哪两个数字加起来等于5？', opts: ['1+2', '2+3', '3+4', '4+5'], ans: 1, diff: 1 },
+                { text: '10里面有___个一', opts: ['1', '5', '10', '0'], ans: 2, diff: 1 },
+                { text: '下面哪个数字最小？', opts: ['9', '6', '3', '8'], ans: 2, diff: 1 },
+                // 普通 (diff:2)
+                { text: '20里面有___个十', opts: ['1', '2', '10', '20'], ans: 1, diff: 2 },
+                { text: '下面哪个是三位数？', opts: ['99', '100', '10', '9'], ans: 1, diff: 2 },
+                { text: '15和18中间的数字是几？', opts: ['14', '16', '17', '19'], ans: 1, diff: 2 },
+                { text: '下面哪个数比20大？', opts: ['15', '18', '20', '21'], ans: 3, diff: 2 },
+                { text: '个位是5，十位是1的数是？', opts: ['51', '15', '5', '50'], ans: 1, diff: 2 },
+                { text: '一支铅笔大约长___', opts: ['20厘米', '20米', '2厘米', '2米'], ans: 0, diff: 2 },
+                { text: '半小时等于___分钟', opts: ['30', '60', '15', '45'], ans: 0, diff: 2 },
+                { text: '下面哪个算式结果是10？', opts: ['5+4', '6+5', '7+3', '8+4'], ans: 2, diff: 2 },
+                { text: '1元等于___角', opts: ['5', '10', '50', '100'], ans: 1, diff: 2 },
+                { text: '正方形有几条边？', opts: ['3', '4', '5', '6'], ans: 1, diff: 2 },
+                // 困难 (diff:3)
+                { text: '1米等于___厘米', opts: ['10', '50', '100', '1000'], ans: 2, diff: 3 },
+                { text: '下面哪个是质数？', opts: ['4', '6', '7', '8'], ans: 2, diff: 3 },
+                { text: '48除以6等于几？', opts: ['6', '7', '8', '9'], ans: 2, diff: 3 },
+                { text: '一个三角形有___个角', opts: ['2', '3', '4', '5'], ans: 1, diff: 3 },
+                { text: '一年有___个月', opts: ['10', '11', '12', '13'], ans: 2, diff: 3 },
+                { text: '下面哪个算式结果最大？', opts: ['2×3', '2+3', '3×3', '3+3'], ans: 2, diff: 3 },
+                { text: '25+___=50，空格里填几？', opts: ['15', '20', '25', '30'], ans: 2, diff: 3 },
+                { text: '长方形有___条边', opts: ['3', '4', '5', '6'], ans: 1, diff: 3 },
+                { text: '下面哪个是偶数？', opts: ['7', '9', '11', '12'], ans: 3, diff: 3 },
+                { text: '500克等于___斤', opts: ['1', '2', '5', '10'], ans: 0, diff: 3 },
+            ],
+            truefalse: [
+                // 简单 (diff:1)
+                { text: '3+2=5', opts: ['✓ 正确', '✗ 错误'], ans: 0, diff: 1 },
+                { text: '4-1=2', opts: ['✓ 正确', '✗ 错误'], ans: 1, diff: 1 },
+                { text: '5比3大', opts: ['✓ 正确', '✗ 错误'], ans: 0, diff: 1 },
+                { text: '7比9大', opts: ['✓ 正确', '✗ 错误'], ans: 1, diff: 1 },
+                { text: '2+3=3+2', opts: ['✓ 正确', '✗ 错误'], ans: 0, diff: 1 },
+                { text: '6-2=5', opts: ['✓ 正确', '✗ 错误'], ans: 1, diff: 1 },
+                { text: '8+0=8', opts: ['✓ 正确', '✗ 错误'], ans: 0, diff: 1 },
+                { text: '4+4=9', opts: ['✓ 正确', '✗ 错误'], ans: 1, diff: 1 },
+                { text: '10比5大', opts: ['✓ 正确', '✗ 错误'], ans: 0, diff: 1 },
+                { text: '3-3=1', opts: ['✓ 正确', '✗ 错误'], ans: 1, diff: 1 },
+                // 普通 (diff:2)
+                { text: '100比99大', opts: ['✓ 正确', '✗ 错误'], ans: 0, diff: 2 },
+                { text: '半小时=30分钟', opts: ['✓ 正确', '✗ 错误'], ans: 0, diff: 2 },
+                { text: '1米=10厘米', opts: ['✓ 正确', '✗ 错误'], ans: 1, diff: 2 },
+                { text: '正方形有4条边', opts: ['✓ 正确', '✗ 错误'], ans: 0, diff: 2 },
+                { text: '15-7=9', opts: ['✓ 正确', '✗ 错误'], ans: 1, diff: 2 },
+                { text: '12+8=20', opts: ['✓ 正确', '✗ 错误'], ans: 0, diff: 2 },
+                { text: '一年有10个月', opts: ['✓ 正确', '✗ 错误'], ans: 1, diff: 2 },
+                { text: '0是最小的自然数', opts: ['✓ 正确', '✗ 错误'], ans: 0, diff: 2 },
+                { text: '18除以3等于5', opts: ['✓ 正确', '✗ 错误'], ans: 1, diff: 2 },
+                { text: '平行四边形有四条边', opts: ['✓ 正确', '✗ 错误'], ans: 0, diff: 2 },
+                // 困难 (diff:3)
+                { text: '质数都是奇数', opts: ['✓ 正确', '✗ 错误'], ans: 1, diff: 3 },
+                { text: '1米等于100厘米', opts: ['✓ 正确', '✗ 错误'], ans: 0, diff: 3 },
+                { text: '三角形内角和是180度', opts: ['✓ 正确', '✗ 错误'], ans: 0, diff: 3 },
+                { text: '9×8=72', opts: ['✓ 正确', '✗ 错误'], ans: 0, diff: 3 },
+                { text: '56÷7=9', opts: ['✓ 正确', '✗ 错误'], ans: 1, diff: 3 },
+                { text: '0乘以任何数都得0', opts: ['✓ 正确', '✗ 错误'], ans: 0, diff: 3 },
+                { text: '两个偶数的和一定是偶数', opts: ['✓ 正确', '✗ 错误'], ans: 0, diff: 3 },
+                { text: '1千克铁比1千克棉花重', opts: ['✓ 正确', '✗ 错误'], ans: 1, diff: 3 },
+                { text: '正方形是特殊的长方形', opts: ['✓ 正确', '✗ 错误'], ans: 0, diff: 3 },
+                { text: '最小的三位数是111', opts: ['✓ 正确', '✗ 错误'], ans: 1, diff: 3 },
+            ]
+        };
+
+        // ===== Audio =====
+        const MathAudio = (() => {
+            let ctx = null;
+            function init() {
+                if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+                if (ctx.state === 'suspended') ctx.resume();
+            }
+            function playTone(freq, type, duration) {
+                init();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + duration);
+            }
+            return {
+                init() { init(); },
+                correct() {
+                    playTone(600, 'sine', 0.1);
+                    setTimeout(() => playTone(800, 'sine', 0.1), 100);
+                    setTimeout(() => playTone(1000, 'sine', 0.2), 200);
+                },
+                wrong() {
+                    playTone(300, 'sawtooth', 0.3);
+                    setTimeout(() => playTone(250, 'sawtooth', 0.3), 150);
+                },
+                victory() {
+                    const notes = [523, 659, 784, 1047];
+                    notes.forEach((n, i) => {
+                        setTimeout(() => playTone(n, 'sine', 0.3), i * 150);
+                    });
+                }
+            };
+        })();
+
+        // ===== Mode Switching =====
+        function switchMode(mode) {
+            modeTabs.forEach(t => t.classList.toggle('active', t.dataset.mode === mode));
+            Object.keys(panels).forEach(key => {
+                panels[key].classList.toggle('active', key === mode);
+            });
+            currentMode = mode;
+        }
+
+        // ===== Preset Button Helpers =====
+        function selectPreset(el, groupId) {
+            const parent = el.parentElement;
+            parent.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            // Clear related custom input
+            if (groupId === 'challengeCount') {
+                document.getElementById('challengeCountInput').value = '';
+            } else if (groupId === 'challengeTime') {
+                document.getElementById('challengeTimeInput').value = '';
+            }
+        }
+
+        function clearPresetGroup(groupId) {
+            const btnId = groupId === 'challengeCount' ? 'challengeCountBtns' : 'challengeTimeBtns';
+            document.getElementById(btnId).querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+        }
+
+        function getChallengeDifficulty() {
+            const active = document.querySelector('#challengeDiff .preset-btn.active');
+            return active ? active.dataset.diff : 'easy';
+        }
+
+        function getChallengeCount() {
+            const input = document.getElementById('challengeCountInput');
+            if (input.value) return Math.max(1, parseInt(input.value) || 5);
+            const active = document.querySelector('#challengeCountBtns .preset-btn.active');
+            return active ? parseInt(active.dataset.value) : 5;
+        }
+
+        function getChallengeTime() {
+            const input = document.getElementById('challengeTimeInput');
+            if (input.value) return Math.max(1, parseInt(input.value) || 60);
+            const active = document.querySelector('#challengeTimeBtns .preset-btn.active');
+            return active ? parseInt(active.dataset.value) : 60;
+        }
+
+        function getTimerDifficulty() {
+            const active = document.querySelector('#timerDiff .preset-btn.active');
+            return active ? active.dataset.diff : 'easy';
+        }
+
+        // ===== Category Helpers =====
+        function switchCategory(el, mode) {
+            const idMap = { learning: 'learningCategory', challenge: 'challengeCategory', timer: 'timerCategory' };
+            const parent = document.getElementById(idMap[mode]);
+            parent.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            currentCategory = el.dataset.cat;
+        }
+
+        function getLearningCategory() {
+            const active = document.querySelector('#learningCategory .preset-btn.active');
+            return active ? active.dataset.cat : 'arithmetic';
+        }
+
+        function getChallengeCategory() {
+            const active = document.querySelector('#challengeCategory .preset-btn.active');
+            return active ? active.dataset.cat : 'arithmetic';
+        }
+
+        function getTimerCategory() {
+            const active = document.querySelector('#timerCategory .preset-btn.active');
+            return active ? active.dataset.cat : 'arithmetic';
+        }
+
+        function filterQuestions(category, diff) {
+            if (category === 'arithmetic') return null;
+            const bank = questionBank[category];
+            if (!bank) return [];
+            return bank.filter(q => q.diff === (diff === 'easy' ? 1 : diff === 'medium' ? 2 : 3));
+        }
+
+        // ===== Question Generation =====
+        function generateQuestion() {
+            let num1, num2, operator, answer;
+            const ops = difficulty === 'hard' ? ['+', '-', '×'] : ['+', '-'];
+            
+            if (difficulty === 'easy') {
+                num1 = Math.floor(Math.random() * 10) + 1;
+                num2 = Math.floor(Math.random() * 10) + 1;
+                operator = ops[Math.floor(Math.random() * ops.length)];
+            } else if (difficulty === 'medium') {
+                num1 = Math.floor(Math.random() * 50) + 1;
+                num2 = Math.floor(Math.random() * 50) + 1;
+                operator = ops[Math.floor(Math.random() * ops.length)];
+            } else {
+                num1 = Math.floor(Math.random() * 20) + 1;
+                num2 = Math.floor(Math.random() * 20) + 1;
+                operator = ops[Math.floor(Math.random() * ops.length)];
+            }
+
+            if (operator === '-') {
+                if (num1 < num2) [num1, num2] = [num2, num1];
+                answer = num1 - num2;
+            } else if (operator === '×') {
+                answer = num1 * num2;
+            } else {
+                answer = num1 + num2;
+            }
+
+            const options = [answer];
+            while (options.length < 4) {
+                let wrongAnswer;
+                do {
+                    const offset = Math.floor(Math.random() * 10) - 5;
+                    wrongAnswer = answer + offset;
+                } while (wrongAnswer === answer || options.includes(wrongAnswer) || wrongAnswer < 0);
+                options.push(wrongAnswer);
+            }
+
+            options.sort(() => Math.random() - 0.5);
+
+            return {
+                text: `${num1} ${operator} ${num2} = ?`,
+                answer: answer,
+                options: options
+            };
+        }
+
+        function preGenerateQuestions(count, diff, cat) {
+            cat = cat || currentCategory;
+            if (cat !== 'arithmetic') {
+                const filtered = filterQuestions(cat, diff);
+                if (!filtered || filtered.length === 0) return [];
+                const shuffled = [...filtered].sort(() => Math.random() - 0.5);
+                return shuffled.slice(0, Math.min(count, shuffled.length));
+            }
+            const saved = difficulty;
+            difficulty = diff;
+            const questions = [];
+            for (let i = 0; i < count; i++) {
+                questions.push(generateQuestion());
+            }
+            difficulty = saved;
+            return questions;
+        }
+
+        // ===== Display =====
+        function displayQuestion() {
+            let q;
+            if (currentMode === 'learning') {
+                const cat = getLearningCategory();
+                currentCategory = cat;
+                if (cat !== 'arithmetic') {
+                    const filtered = filterQuestions(cat, difficulty);
+                    if (filtered && filtered.length > 0) {
+                        q = filtered[Math.floor(Math.random() * filtered.length)];
+                    } else {
+                        q = generateQuestion();
+                    }
+                } else {
+                    q = generateQuestion();
+                }
+            } else {
+                q = preGenQuestions[currentQIndex];
+                if (!q) { endGame(); return; }
+            }
+            questionText.textContent = q.text;
+            currentAnswer = q.ans !== undefined ? q.ans : q.answer;
+            questionNumber.textContent = `第 ${currentQIndex + 1} 题`;
+            currentQEl.textContent = currentQIndex + 1;
+
+            // True/False mode: only 2 buttons
+            if (currentCategory === 'truefalse') {
+                answerArea.classList.add('tf-mode');
+            } else {
+                answerArea.classList.remove('tf-mode');
+            }
+
+            answerButtons.forEach((btn, i) => {
+                btn.textContent = q.opts ? q.opts[i] : (q.options ? q.options[i] : '');
+                btn.classList.remove('correct', 'wrong');
+                btn.disabled = false;
+            });
+
+            feedback.textContent = '';
+            feedback.classList.remove('correct', 'wrong');
+
+            // Adjust font size for long word problem text
+            if (currentCategory === 'word' && q.text.length > 20) {
+                questionText.style.fontSize = '28px';
+            } else {
+                questionText.style.fontSize = '';
+            }
+        }
+
+        // ===== Check Answer =====
+        function checkAnswer(index) {
+            if (!isPlaying || challengeEnded) return;
+            
+            let isCorrect;
+            
+            answerButtons.forEach(btn => btn.disabled = true);
+
+            if (currentCategory === 'truefalse') {
+                // True/False: answer is the index itself (0 or 1)
+                isCorrect = (index === currentAnswer);
+            } else if (currentCategory === 'arithmetic') {
+                // Arithmetic: compare parsed numeric value
+                const selectedAnswer = parseInt(answerButtons[index].textContent);
+                isCorrect = (selectedAnswer === currentAnswer);
+            } else {
+                // Word/Choice: compare by option index
+                isCorrect = (index === currentAnswer);
+            }
+
+            if (isCorrect) {
+                answerButtons[index].classList.add('correct');
+                feedback.textContent = '✅ 回答正确！太棒了！';
+                feedback.classList.add('correct');
+                score++;
+                scoreEl.textContent = score;
+                MathAudio.correct();
+            } else {
+                answerButtons[index].classList.add('wrong');
+                let correctText;
+                if (currentCategory === 'truefalse') {
+                    correctText = answerButtons[currentAnswer].textContent;
+                } else if (currentCategory === 'arithmetic') {
+                    correctText = currentAnswer;
+                } else {
+                    correctText = answerButtons[currentAnswer].textContent;
+                }
+                feedback.textContent = `❌ 回答错误！正确答案是 ${correctText}`;
+                feedback.classList.add('wrong');
+                MathAudio.wrong();
+                
+                answerButtons.forEach((btn, i) => {
+                    let isCorrectBtn;
+                    if (currentCategory === 'truefalse') {
+                        isCorrectBtn = (i === currentAnswer);
+                    } else if (currentCategory === 'arithmetic') {
+                        isCorrectBtn = (parseInt(btn.textContent) === currentAnswer);
+                    } else {
+                        isCorrectBtn = (i === currentAnswer);
+                    }
+                    if (isCorrectBtn) {
+                        btn.classList.add('correct');
+                    }
+                });
+            }
+
+            currentQIndex++;
+
+            setTimeout(() => {
+                if (currentQIndex >= totalQuestions) {
+                    endGame();
+                } else {
+                    displayQuestion();
+                }
+            }, 1500);
+        }
+
+        // ===== Timer =====
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (currentMode === 'challenge') {
+                    timer--;
+                    timerEl.textContent = timer;
+                    if (timer <= 0) {
+                        timerEl.textContent = '0';
+                        endGame();
+                    }
+                } else {
+                    timer++;
+                    timerEl.textContent = timer;
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        // ===== Game Start Functions =====
+        function startGame(mode, diff) {
+            MathAudio.init();
+            currentMode = mode;
+            difficulty = diff;
+            currentCategory = getLearningCategory();
+            currentQIndex = 0;
+            score = 0;
+            timer = 0;
+            isPlaying = true;
+            challengeEnded = false;
+            preGenQuestions = [];
+            totalQuestions = 10;
+            timerDirection = 1;
+
+            modeLabel.textContent = modeNames[mode];
+            startOverlay.style.display = 'none';
+            quizArea.style.display = 'block';
+            
+            scoreEl.textContent = '0';
+            timerEl.textContent = '0';
+            
+            stopTimer();
+            startTimer();
+
+            displayQuestion();
+        }
+
+        function startChallenge() {
+            MathAudio.init();
+            currentMode = 'challenge';
+            difficulty = getChallengeDifficulty();
+            currentCategory = getChallengeCategory();
+            const count = getChallengeCount();
+            const time = getChallengeTime();
+
+            currentQIndex = 0;
+            score = 0;
+            timer = time;
+            timeLimit = time;
+            totalQuestions = count;
+            isPlaying = true;
+            challengeEnded = false;
+            timerDirection = -1;
+
+            // Pre-generate all questions
+            preGenQuestions = preGenerateQuestions(count, difficulty, currentCategory);
+            totalQuestions = preGenQuestions.length;
+
+            modeLabel.textContent = '🏆 挑战赛';
+            startOverlay.style.display = 'none';
+            quizArea.style.display = 'block';
+
+            scoreEl.textContent = '0';
+            timerEl.textContent = timer;
+
+            stopTimer();
+            startTimer();
+
+            displayQuestion();
+        }
+
+        function startTimerRace() {
+            MathAudio.init();
+            currentMode = 'timer';
+            difficulty = getTimerDifficulty();
+            currentCategory = getTimerCategory();
+
+            currentQIndex = 0;
+            score = 0;
+            timer = 0;
+            totalQuestions = 10;
+            isPlaying = true;
+            challengeEnded = false;
+            timerDirection = 1;
+
+            // Pre-generate 10 questions
+            preGenQuestions = preGenerateQuestions(10, difficulty, currentCategory);
+            totalQuestions = preGenQuestions.length;
+
+            modeLabel.textContent = '⏱️ 计时赛';
+            startOverlay.style.display = 'none';
+            quizArea.style.display = 'block';
+
+            scoreEl.textContent = '0';
+            timerEl.textContent = '0';
+
+            stopTimer();
+            startTimer();
+
+            displayQuestion();
+        }
+
+        // ===== Game End =====
+        function endGame() {
+            if (!isPlaying) return;
+            isPlaying = false;
+            challengeEnded = true;
+            stopTimer();
+
+            const elapsed = currentMode === 'challenge' ? (timeLimit - timer) : timer;
+            const correctCount = score;
+            const total = totalQuestions;
+            const percent = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+
+            let title = '🎉 挑战完成！';
+            let statsHtml = '';
+
+            switch (currentMode) {
+                case 'learning':
+                    title = '🎉 学习完成！';
+                    statsHtml = `
+                        难度：${diffNames[difficulty]}<br>
+                        得分：${correctCount} / ${total}<br>
+                        用时：${elapsed} 秒<br>
+                        正确率：${percent}%
+                    `;
+                    if (percent >= 80) MathAudio.victory();
+                    break;
+
+                case 'challenge':
+                    if (timer <= 0 && currentQIndex < total) {
+                        title = '⏰ 时间到！';
+                    } else {
+                        title = '🎉 挑战完成！';
+                    }
+                    statsHtml = `
+                        难度：${diffNames[difficulty]}<br>
+                        得分：${correctCount} / ${total}<br>
+                        用时：${elapsed} 秒
+                    `;
+                    if (percent >= 80) MathAudio.victory();
+                    break;
+
+                case 'timer':
+                    title = '⏱️ 计时完成！';
+                    statsHtml = `
+                        难度：${diffNames[difficulty]}<br>
+                        总用时：${elapsed} 秒<br>
+                        得分：${correctCount} / ${total}<br>
+                        正确率：${percent}%
+                    `;
+                    if (percent >= 80) MathAudio.victory();
+                    break;
+            }
+
+            overlayTitle.textContent = title;
+            finalStats.innerHTML = statsHtml;
+            overlay.classList.add('show');
+
+            if (percent >= 80) launchConfetti();
+        }
+
+        // ===== Go To Start =====
+        function goToStart() {
+            stopTimer();
+            overlay.classList.remove('show');
+            startOverlay.style.display = 'block';
+            quizArea.style.display = 'none';
+            currentQIndex = 0;
+            score = 0;
+            timer = 0;
+            isPlaying = false;
+            challengeEnded = false;
+            preGenQuestions = [];
+            currentCategory = 'arithmetic';
+            answerArea.classList.remove('tf-mode');
+            questionText.style.fontSize = '';
+            // Remove confetti remnants
+            document.querySelectorAll('.confetti').forEach(el => el.remove());
+        }
+
+        // restartGame is an alias for goToStart for backward compatibility (topBar button)
+        function restartGame() {
+            goToStart();
+        }
+
+        // ===== Confetti =====
+        function launchConfetti() {
+            const colors = ['#FF6B6B', '#FFD700', '#48DBFB', '#FF9FF3', '#54a0ff', '#00d2d3', '#f8a5c2', '#FFA500', '#38ef7d'];
+            for (let i = 0; i < 80; i++) {
+                const el = document.createElement('div');
+                el.className = 'confetti';
+                const size = 4 + Math.random() * 6;
+                el.style.width = size + 'px';
+                el.style.height = size + 'px';
+                el.style.background = colors[Math.floor(Math.random() * colors.length)];
+                el.style.left = Math.random() * 100 + '%';
+                el.style.animationDuration = (3 + Math.random() * 3) + 's';
+                el.style.animationDelay = Math.random() * 2 + 's';
+                document.body.appendChild(el);
+            }
+            setTimeout(() => {
+                document.querySelectorAll('.confetti').forEach(el => el.remove());
+            }, 6000);
+        }
+    </script>
+</body>
+</html>

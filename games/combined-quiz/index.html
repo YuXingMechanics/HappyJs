@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>综合练习 - 快乐学习乐园</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nunito', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(160deg, #f6d5f7 0%, #fbe9d7 25%, #e0e7ff 55%, #d4fcdf 85%, #f0fdf4 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 900;
+            color: #2d3436;
+            text-align: center;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+        }
+
+        .page-subtitle {
+            font-size: 14px;
+            color: #636e72;
+            margin-bottom: 32px;
+            font-weight: 600;
+        }
+
+        .subject-container {
+            display: flex;
+            gap: 24px;
+        }
+
+        .subject-card {
+            width: 240px;
+            height: 160px;
+            border-radius: 20px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: transform 0.25s cubic-bezier(.2,0,0,1), box-shadow 0.25s;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            gap: 6px;
+        }
+
+        .subject-card:hover {
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 14px 36px rgba(0,0,0,0.18);
+        }
+
+        .subject-card:active {
+            transform: scale(0.95);
+        }
+
+        .subject-card.math {
+            background: linear-gradient(135deg, #a29bfe, #6c5ce7);
+        }
+        .subject-card.english {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+        }
+        .subject-card.chinese {
+            background: linear-gradient(135deg, #fdcb6e, #e17055);
+        }
+
+        .subject-icon {
+            font-size: 42px;
+        }
+
+        .subject-name {
+            font-size: 18px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+
+        /* ===== 覆盖层 ===== */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 100;
+            display: none;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        .overlay.open {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quiz-frame {
+            width: 800px;
+            height: 580px;
+            max-width: 95vw;
+            max-height: 90vh;
+            background: rgba(255,255,255,0.06);
+            border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        .quiz-frame-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 18px;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .quiz-frame-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .close-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .close-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .quiz-frame-body {
+            width: 100%;
+            height: calc(100% - 46px);
+            position: relative;
+        }
+
+        .quiz-frame-body iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        .loading-tip {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: rgba(255,255,255,0.5);
+            font-size: 13px;
+            text-align: center;
+        }
+        .loading-tip .spinner {
+            width: 28px;
+            height: 28px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: rgba(255,255,255,0.5);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 8px auto;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* 返回按钮 */
+        .back-link {
+            position: fixed;
+            top: 16px;
+            left: 20px;
+            color: #636e72;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.6);
+            backdrop-filter: blur(4px);
+            transition: background 0.2s;
+            z-index: 5;
+        }
+        .back-link:hover {
+            background: rgba(255,255,255,0.9);
+        }
+
+        @media (max-width: 540px) {
+            body { padding: 40px 12px 20px; justify-content: flex-start; }
+            .page-title { font-size: 24px; margin-top: 20px; }
+            .page-subtitle { margin-bottom: 20px; font-size: 13px; }
+            .subject-container {
+                flex-direction: column;
+                gap: 14px;
+                width: 100%;
+                max-width: 280px;
+            }
+            .subject-card {
+                width: 100%;
+                height: 100px;
+                flex-direction: row;
+                gap: 12px;
+                padding: 0 20px;
+                justify-content: flex-start;
+            }
+            .subject-icon { font-size: 32px; }
+            .subject-name { font-size: 16px; }
+            .quiz-frame {
+                width: 100%;
+                height: 100%;
+                max-width: 100vw;
+                max-height: 100vh;
+                border-radius: 0;
+            }
+            .back-link { top: 8px; left: 10px; font-size: 12px; padding: 4px 10px; }
+        }
+    </style>
+</head>
+<body>
+
+<a class="back-link" href="../../index.html">← 返回</a>
+
+<div class="page-title">📚 综合练习</div>
+<div class="page-subtitle">选择科目开始练习</div>
+
+<div class="subject-container">
+    <div class="subject-card math" data-subject="math">
+        <div class="subject-icon">🧮</div>
+        <div class="subject-name">数学</div>
+    </div>
+    <div class="subject-card english" data-subject="english">
+        <div class="subject-icon">📖</div>
+        <div class="subject-name">英语</div>
+    </div>
+    <div class="subject-card chinese" data-subject="chinese">
+        <div class="subject-icon">📚</div>
+        <div class="subject-name">语文</div>
+    </div>
+</div>
+
+<div class="overlay" id="overlay">
+    <div class="quiz-frame">
+        <div class="quiz-frame-header">
+            <span class="quiz-frame-title" id="frameTitle">🧮 数学</span>
+            <button class="close-btn" id="closeBtn">✕</button>
+        </div>
+        <div class="quiz-frame-body">
+            <div class="loading-tip" id="loadingTip">
+                <div class="spinner"></div>
+                <span>加载中...</span>
+            </div>
+            <iframe id="quizIframe" src="" allow="autoplay"></iframe>
+        </div>
+    </div>
+</div>
+
+<script>
+    const overlay = document.getElementById('overlay');
+    const quizFrame = document.getElementById('quizIframe');
+    const frameTitle = document.getElementById('frameTitle');
+    const closeBtn = document.getElementById('closeBtn');
+    const loadingTip = document.getElementById('loadingTip');
+
+    const subjects = {
+        math: { name: '🧮 数学', url: '../math-quiz/index.html' },
+        english: { name: '📖 英语', url: '../english-quiz/index.html' },
+        chinese: { name: '📚 语文', url: '../chinese-quiz/index.html' },
+    };
+
+    document.querySelectorAll('.subject-card').forEach(card => {
+        card.addEventListener('click', function() {
+            const subject = this.dataset.subject;
+            const info = subjects[subject];
+            if (!info) return;
+
+            frameTitle.textContent = info.name;
+            quizFrame.src = '';
+            loadingTip.style.display = 'block';
+            overlay.classList.add('open');
+
+            setTimeout(() => {
+                quizFrame.src = info.url;
+            }, 150);
+
+            quizFrame.onload = function() {
+                loadingTip.style.display = 'none';
+            };
+        });
+    });
+
+    function closeOverlay() {
+        overlay.classList.remove('open');
+        setTimeout(() => { quizFrame.src = ''; }, 200);
+    }
+
+    closeBtn.addEventListener('click', closeOverlay);
+
+    overlay.addEventListener('click', function(e) {
+        if (!e.target.closest('.quiz-frame')) closeOverlay();
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && overlay.classList.contains('open')) closeOverlay();
+    });
+</script>
+</body>
+</html>

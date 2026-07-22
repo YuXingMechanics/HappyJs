@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>彩色绘画板</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Nunito', sans-serif;
+  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 50%, #d4fc79 100%);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  max-width: 100vw;
+  padding: 8px;
+  gap: 8px;
+}
+
+/* ===== Top Toolbar ===== */
+.top-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  flex-shrink: 0;
+  min-height: 48px;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: #5b6abf;
+  padding: 6px 12px;
+  background: rgba(91, 106, 191, 0.12);
+  border-radius: 10px;
+  transition: background 0.2s, transform 0.1s;
+  white-space: nowrap;
+}
+.back-link:hover { background: rgba(91, 106, 191, 0.22); }
+.back-link:active { transform: scale(0.95); }
+
+.app-title-top {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  color: #4a4a6a;
+  letter-spacing: 0.5px;
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ===== Canvas Area ===== */
+.canvas-wrap {
+  flex: 1;
+  min-height: 0;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.10), inset 0 0 0 2px rgba(255,255,255,0.6);
+  position: relative;
+  overflow: hidden;
+}
+.canvas-wrap canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+/* ===== Bottom Toolbar ===== */
+.bottom-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.toolbar-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+.colors-row { justify-content: center; }
+.tools-row { justify-content: center; }
+
+/* ---- Color Swatches ---- */
+.color-swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition: transform 0.12s, border-color 0.12s, box-shadow 0.12s;
+  flex-shrink: 0;
+  position: relative;
+}
+.color-swatch:hover { transform: scale(1.12); }
+.color-swatch:active { transform: scale(0.92); }
+.color-swatch.active {
+  border-color: #5b6abf;
+  box-shadow: 0 0 0 2px rgba(91,106,191,0.30);
+  transform: scale(1.10);
+}
+.color-swatch.picker-swatch {
+  background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red);
+  border-color: #bbb;
+}
+.color-swatch.picker-swatch.active {
+  border-color: #5b6abf;
+}
+
+/* ---- Custom Color Picker (hidden input) ---- */
+#colorPickerInput {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+/* ---- Tool Buttons ---- */
+.tool-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 6px 14px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+  background: rgba(200, 200, 220, 0.25);
+  color: #4a4a6a;
+  white-space: nowrap;
+  min-height: 38px;
+}
+.tool-btn:hover { background: rgba(200, 200, 220, 0.45); }
+.tool-btn:active { transform: scale(0.94); }
+.tool-btn.active {
+  background: #5b6abf;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(91,106,191,0.30);
+}
+.tool-btn .icon { font-size: 18px; line-height: 1; }
+
+.size-btn {
+  min-width: 38px;
+  padding: 6px 10px;
+}
+.size-dot {
+  display: inline-block;
+  border-radius: 50%;
+  background: currentColor;
+}
+.size-dot.sm { width: 4px; height: 4px; }
+.size-dot.md { width: 10px; height: 10px; }
+.size-dot.lg { width: 16px; height: 16px; }
+
+/* ---- Separator ---- */
+.separator {
+  width: 1px;
+  height: 28px;
+  background: rgba(0,0,0,0.10);
+  flex-shrink: 0;
+}
+
+/* ---- Footer Title ---- */
+.app-title-bottom {
+  text-align: center;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  color: rgba(74, 74, 106, 0.55);
+  padding-bottom: 4px;
+  letter-spacing: 1px;
+}
+
+/* ---- Responsive tweaks ---- */
+@media (min-width: 600px) {
+  .app { padding: 12px; gap: 12px; }
+  .top-bar { padding: 10px 16px; border-radius: 20px; }
+  .bottom-bar { gap: 10px; }
+  .toolbar-row { padding: 10px 16px; border-radius: 20px; gap: 8px; }
+  .color-swatch { width: 36px; height: 36px; }
+  .tool-btn { padding: 8px 18px; font-size: 15px; }
+  .app-title-top { font-size: 20px; }
+}
+@media (max-width: 380px) {
+  .color-swatch { width: 26px; height: 26px; }
+  .tool-btn { font-size: 12px; padding: 4px 10px; min-height: 32px; }
+  .app-title-top { font-size: 15px; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <a class="back-link" href="../../index.html">← 返回</a>
+    <span class="app-title-top">🎨 彩色绘画板</span>
+  </div>
+
+  <!-- Canvas -->
+  <div class="canvas-wrap">
+    <canvas id="drawCanvas"></canvas>
+  </div>
+
+  <!-- Bottom Bar -->
+  <div class="bottom-bar">
+    <!-- Colors Row -->
+    <div class="toolbar-row colors-row" id="colorsRow">
+      <!-- Color swatches injected by JS -->
+    </div>
+
+    <!-- Tools Row -->
+    <div class="toolbar-row tools-row" id="toolsRow">
+      <button class="tool-btn" data-tool="pen" data-active="true">
+        <span class="icon">✏️</span> 画笔
+      </button>
+      <button class="tool-btn" data-tool="eraser">
+        <span class="icon">🧹</span> 橡皮
+      </button>
+      <div class="separator"></div>
+      <button class="tool-btn size-btn" data-size="2" data-active="true">
+        <span class="size-dot sm"></span> 小
+      </button>
+      <button class="tool-btn size-btn" data-size="6">
+        <span class="size-dot md"></span> 中
+      </button>
+      <button class="tool-btn size-btn" data-size="12">
+        <span class="size-dot lg"></span> 大
+      </button>
+      <div class="separator"></div>
+      <button class="tool-btn" id="undoBtn">
+        <span class="icon">↩️</span> 撤销
+      </button>
+      <button class="tool-btn" id="clearBtn">
+        <span class="icon">🗑️</span> 清空
+      </button>
+    </div>
+
+    <!-- Footer Title -->
+    <div class="app-title-bottom">彩色绘画板</div>
+  </div>
+</div>
+
+<!-- Hidden custom color input -->
+<input type="color" id="colorPickerInput" value="#ff0000">
+
+<script>
+(function() {
+  'use strict';
+
+  // ===== Preset Colors =====
+  const COLORS = [
+    { name: '红色', hex: '#ef4444' },
+    { name: '橙色', hex: '#f97316' },
+    { name: '黄色', hex: '#eab308' },
+    { name: '绿色', hex: '#22c55e' },
+    { name: '青色', hex: '#06b6d4' },
+    { name: '蓝色', hex: '#3b82f6' },
+    { name: '紫色', hex: '#a855f7' },
+    { name: '粉色', hex: '#ec4899' },
+    { name: '棕色', hex: '#8b5e3c' },
+    { name: '黑色', hex: '#1e1e1e' },
+    { name: '白色', hex: '#ffffff' },
+  ];
+
+  // ===== DOM Refs =====
+  const canvas = document.getElementById('drawCanvas');
+  const ctx = canvas.getContext('2d');
+  const colorsRow = document.getElementById('colorsRow');
+  const colorPickerInput = document.getElementById('colorPickerInput');
+  const toolBtns = document.querySelectorAll('[data-tool]');
+  const sizeBtns = document.querySelectorAll('[data-size]');
+  const undoBtn = document.getElementById('undoBtn');
+  const clearBtn = document.getElementById('clearBtn');
+
+  // ===== State =====
+  let isDrawing = false;
+  let currentTool = 'pen';       // 'pen' | 'eraser'
+  let currentColor = '#ef4444';
+  let currentSize = 2;
+  let lastX = 0;
+  let lastY = 0;
+
+  // Undo stack: array of ImageData
+  const undoStack = [];
+  const MAX_UNDO = 30;
+
+  // ===== Canvas Sizing =====
+  function resizeCanvas() {
+    const wrap = canvas.parentElement;
+    const rect = wrap.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+
+    // Restore last drawing if we have a saved state
+    if (undoStack.length > 0) {
+      const imgData = undoStack[undoStack.length - 1];
+      // We need to restore with scaling considered
+      // Since we rescale, we save a clean snapshot after resize
+    }
+
+    // Draw white background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, rect.width, rect.height);
+  }
+
+  // ===== Drawing Helpers =====
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    let clientX, clientY;
+    if (e.touches) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+      e.preventDefault();
+    } else {
+      clientX = e.clientX;
+      clientY = e.clientY;
+    }
+    return {
+      x: clientX - rect.left,
+      y: clientY - rect.top,
+    };
+  }
+
+  function startDrawing(e) {
+    e.preventDefault();
+    const pos = getPos(e);
+    isDrawing = true;
+    lastX = pos.x;
+    lastY = pos.y;
+    // Draw a single dot for tap
+    ctx.beginPath();
+    ctx.arc(lastX, lastY, currentSize / 2, 0, Math.PI * 2);
+    ctx.fillStyle = currentTool === 'eraser' ? '#ffffff' : currentColor;
+    ctx.fill();
+  }
+
+  function draw(e) {
+    if (!isDrawing) return;
+    e.preventDefault();
+
+    const pos = getPos(e);
+    const color = currentTool === 'eraser' ? '#ffffff' : currentColor;
+
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = currentSize;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+
+    lastX = pos.x;
+    lastY = pos.y;
+  }
+
+  function stopDrawing(e) {
+    if (!isDrawing) return;
+    isDrawing = false;
+    e.preventDefault();
+    saveState();
+  }
+
+  // ===== Undo System =====
+  function saveState() {
+    const wrap = canvas.parentElement;
+    const rect = wrap.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    const imgData = ctx.getImageData(0, 0, rect.width * dpr, rect.height * dpr);
+    undoStack.push(imgData);
+    if (undoStack.length > MAX_UNDO) {
+      undoStack.shift();
+    }
+  }
+
+  function undo() {
+    if (undoStack.length <= 1) return;
+    undoStack.pop(); // remove current
+    const imgData = undoStack[undoStack.length - 1];
+    const wrap = canvas.parentElement;
+    const rect = wrap.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    ctx.putImageData(imgData, 0, 0);
+  }
+
+  function clearCanvas() {
+    const wrap = canvas.parentElement;
+    const rect = wrap.getBoundingClientRect();
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, rect.width, rect.height);
+    saveState();
+  }
+
+  // ===== Init canvas with blank white =====
+  function initCanvas() {
+    resizeCanvas();
+    saveState();
+  }
+
+  // ===== Build Color Swatches =====
+  function buildColors() {
+    // Remove existing swatches except the picker input
+    colorsRow.innerHTML = '';
+
+    COLORS.forEach((c) => {
+      const swatch = document.createElement('div');
+      swatch.className = 'color-swatch';
+      swatch.style.background = c.hex;
+      // Add subtle border for white swatch
+      if (c.hex === '#ffffff') {
+        swatch.style.boxShadow = 'inset 0 0 0 1px rgba(0,0,0,0.12)';
+      }
+      swatch.dataset.color = c.hex;
+      swatch.title = c.name;
+      swatch.addEventListener('click', () => selectColor(c.hex, swatch));
+      colorsRow.appendChild(swatch);
+    });
+
+    // Custom color picker swatch
+    const pickerSwatch = document.createElement('div');
+    pickerSwatch.className = 'color-swatch picker-swatch';
+    pickerSwatch.title = '自定义颜色';
+    pickerSwatch.addEventListener('click', () => {
+      colorPickerInput.click();
+    });
+    colorsRow.appendChild(pickerSwatch);
+
+    // Default: select first color (red)
+    const firstSwatch = colorsRow.querySelector('.color-swatch');
+    if (firstSwatch) firstSwatch.classList.add('active');
+  }
+
+  function selectColor(hex, el) {
+    currentColor = hex;
+    currentTool = 'pen';
+    updateToolActive('pen');
+    colorsRow.querySelectorAll('.color-swatch').forEach((s) => s.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  // ===== Tool / Size Selection =====
+  function updateToolActive(tool) {
+    toolBtns.forEach((btn) => {
+      const isActive = btn.dataset.tool === tool;
+      btn.classList.toggle('active', isActive);
+      btn.dataset.active = isActive ? 'true' : 'false';
+    });
+  }
+
+  function updateSizeActive(size) {
+    const sizeStr = String(size);
+    sizeBtns.forEach((btn) => {
+      const isActive = btn.dataset.size === sizeStr;
+      btn.classList.toggle('active', isActive);
+      btn.dataset.active = isActive ? 'true' : 'false';
+    });
+  }
+
+  // ===== Events =====
+  // --- Mouse events ---
+  canvas.addEventListener('mousedown', startDrawing);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', stopDrawing);
+  canvas.addEventListener('mouseleave', (e) => {
+    if (isDrawing) stopDrawing(e);
+  });
+
+  // --- Touch events ---
+  canvas.addEventListener('touchstart', startDrawing, { passive: false });
+  canvas.addEventListener('touchmove', draw, { passive: false });
+  canvas.addEventListener('touchend', stopDrawing, { passive: false });
+  canvas.addEventListener('touchcancel', stopDrawing, { passive: false });
+
+  // --- Tool buttons ---
+  toolBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const tool = btn.dataset.tool;
+      if (tool === 'pen' || tool === 'eraser') {
+        currentTool = tool;
+        updateToolActive(tool);
+      }
+    });
+  });
+
+  // --- Size buttons ---
+  sizeBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      currentSize = Number(btn.dataset.size);
+      updateSizeActive(currentSize);
+    });
+  });
+
+  // --- Custom color picker ---
+  colorPickerInput.addEventListener('input', (e) => {
+    const hex = e.target.value;
+    currentColor = hex;
+    currentTool = 'pen';
+    updateToolActive('pen');
+
+    // Update picker swatch visual and remove active from others
+    const pickerSwatch = colorsRow.querySelector('.picker-swatch');
+    colorsRow.querySelectorAll('.color-swatch').forEach((s) => s.classList.remove('active'));
+    if (pickerSwatch) {
+      pickerSwatch.style.background = hex;
+      pickerSwatch.classList.add('active');
+    }
+  });
+
+  // --- Undo ---
+  undoBtn.addEventListener('click', undo);
+
+  // --- Clear ---
+  clearBtn.addEventListener('click', () => {
+    if (confirm('确定要清空画布吗？')) {
+      clearCanvas();
+    }
+  });
+
+  // ===== Resize Handling =====
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      // Save current state, resize, then redraw
+      const wrap = canvas.parentElement;
+      const rect = wrap.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const oldImgData = ctx.getImageData(0, 0, rect.width * dpr, rect.height * dpr);
+      resizeCanvas();
+      // Restore the last saved state on new canvas
+      if (undoStack.length > 0) {
+        const lastState = undoStack[undoStack.length - 1];
+        ctx.putImageData(lastState, 0, 0);
+      }
+    }, 200);
+  });
+
+  // ===== Orientation change =====
+  window.addEventListener('orientationchange', () => {
+    setTimeout(() => {
+      window.dispatchEvent(new Event('resize'));
+    }, 300);
+  });
+
+  // ===== Init =====
+  buildColors();
+  updateToolActive('pen');
+  updateSizeActive(2);
+  initCanvas();
+})();
+</script>
+</body>
+</html>

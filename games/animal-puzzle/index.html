@@ -10,7 +10,7 @@
     width: 100%; height: 100%;
     overflow: hidden;
     font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -87,7 +87,6 @@
     gap: 4px;
   }
 
-  /* 左侧：参考图 + 拼图框 */
   #leftPanel {
     display: flex;
     flex-direction: column;
@@ -95,29 +94,6 @@
     gap: 6px;
   }
 
-  #refImage {
-    width: 60px;
-    height: 60px;
-    border-radius: 8px;
-    border: 2px solid rgba(255,255,255,0.4);
-    object-fit: cover;
-    cursor: pointer;
-    transition: transform 0.2s;
-  }
-  #refImage:hover { transform: scale(1.1); }
-  #refImage.enlarged {
-    position: fixed;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%) scale(1);
-    width: min(80vw, 500px);
-    height: min(80vw, 500px);
-    border-radius: 16px;
-    border: 4px solid rgba(255,255,255,0.6);
-    z-index: 200;
-    box-shadow: 0 20px 80px rgba(0,0,0,0.5);
-  }
-
-  /* 主游戏区 */
   #gameArea {
     display: flex;
     gap: 12px;
@@ -125,65 +101,33 @@
     min-height: 0;
     min-width: 0;
     overflow: hidden;
-    align-items: flex-start;
+    align-items: stretch;
   }
 
-  /* 拼图框 */
   #gridFrame {
     display: grid;
-    gap: 1px;
-    background: rgba(0,0,0,0.15);
-    border-radius: 6px;
-    padding: 2px;
+    gap: 0;
+    background: transparent;
     flex-shrink: 0;
   }
 
   .slot {
     position: relative;
-    background: rgba(255,255,255,0.08);
-    border-radius: 2px;
     cursor: pointer;
-    transition: background 0.15s;
     overflow: hidden;
+    transition: background 0.15s;
   }
   .slot:hover {
-    background: rgba(255,255,255,0.18);
-  }
-  .slot.filled {
-    background: transparent;
-  }
-  .slot.filled:hover {
-    background: rgba(255,80,80,0.2);
-  }
-  .slot.highlight {
-    box-shadow: inset 0 0 0 2px rgba(255,215,0,0.7);
-    background: rgba(255,215,0,0.12);
+    background: rgba(255,255,255,0.08);
   }
 
-  .slot img, .piece img {
-    width: 100%;
-    height: 100%;
-    display: block;
-    pointer-events: none;
-  }
-
-  .slot .piece-num {
-    position: absolute;
-    bottom: 1px;
-    right: 2px;
-    font-size: 8px;
-    color: rgba(255,255,255,0.3);
-    pointer-events: none;
-    font-weight: bold;
-  }
-
-  /* 右侧：碎片区 */
   #piecesPanel {
     display: flex;
     flex-direction: column;
     flex: 1;
-    min-width: 0;
+    min-width: 140px;
     max-height: 100%;
+    min-height: 200px;
   }
 
   #piecesPanel .panel-title {
@@ -199,22 +143,23 @@
     display: flex;
     flex-wrap: wrap;
     align-content: flex-start;
-    gap: 3px;
+    gap: 6px;
     overflow-y: auto;
     flex: 1;
-    background: rgba(0,0,0,0.1);
+    background: rgba(0,0,0,0.12);
     border-radius: 8px;
-    padding: 6px;
-    min-height: 60px;
+    padding: 10px;
+    min-height: 150px;
+    min-width: 120px;
   }
 
   .piece {
     position: relative;
-    border-radius: 3px;
     cursor: pointer;
     transition: transform 0.15s, box-shadow 0.15s;
     overflow: hidden;
     flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
   }
   .piece:hover {
     transform: scale(1.08);
@@ -224,7 +169,7 @@
     transform: scale(0.95);
   }
   .piece.selected {
-    box-shadow: 0 0 0 3px #FFD700, 0 0 12px rgba(255,215,0,0.5);
+    box-shadow: 0 0 0 3px #FFD700, 0 0 15px rgba(255,215,0,0.5);
     transform: scale(1.1);
     z-index: 3;
   }
@@ -232,7 +177,38 @@
     display: none;
   }
 
-  /* 加载 */
+  .puzzle-slice {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    background: transparent;
+  }
+  .puzzle-slice img {
+    display: block;
+    pointer-events: none;
+    object-fit: cover;
+  }
+
+  .puzzle-piece {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    background-color: transparent;
+    background-image: none;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  .puzzle-piece.selected {
+    box-shadow: 
+      3px 3px 15px rgba(0,0,0,0.4),
+      0 0 20px rgba(255,215,0,0.3);
+    z-index: 10;
+  }
+
   #loading {
     text-align: center;
     color: #fff;
@@ -248,11 +224,10 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* 开始界面 */
   #startOverlay {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.6);
+    background: rgba(0,0,0,0.65);
     border-radius: 24px;
     z-index: 20;
     display: flex;
@@ -261,28 +236,57 @@
     justify-content: center;
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
+    padding: 20px;
   }
   #startOverlay h2 {
     color: #fff;
-    font-size: 26px;
-    margin-bottom: 6px;
+    font-size: 24px;
+    margin-bottom: 4px;
     text-shadow: 0 2px 10px rgba(0,0,0,0.3);
   }
   #startOverlay p {
-    color: rgba(255,255,255,0.8);
-    font-size: 13px;
-    margin-bottom: 2px;
+    color: rgba(255,255,255,0.7);
+    font-size: 12px;
+    margin-bottom: 12px;
   }
+
+  #themeSelect {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  #themeSelect button {
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 20px;
+    cursor: pointer;
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.9);
+    transition: all 0.2s;
+  }
+  #themeSelect button:hover {
+    background: rgba(255,255,255,0.18);
+    border-color: rgba(255,255,255,0.5);
+  }
+  #themeSelect button.active {
+    background: rgba(255,215,0,0.2);
+    border-color: #FFD700;
+    color: #FFD700;
+  }
+
   #sizeSelect {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    margin-top: 10px;
     justify-content: center;
-    max-width: 340px;
+    max-width: 300px;
   }
   #sizeSelect button {
-    padding: 7px 16px;
+    padding: 7px 14px;
     font-size: 13px;
     font-weight: bold;
     border: 2px solid rgba(255,255,255,0.3);
@@ -298,12 +302,7 @@
     transform: scale(1.05);
   }
   #sizeSelect button:active { transform: scale(0.95); }
-  #sizeSelect button.s4  { border-color: #48DBFB; }
-  #sizeSelect button.s6  { border-color: #FECA57; }
-  #sizeSelect button.s9  { border-color: #FF6B6B; }
-  #sizeSelect button.s10 { border-color: #FF9FF3; }
 
-  /* 胜利蒙层 */
   #overlay {
     display: none;
     position: absolute;
@@ -345,14 +344,12 @@
   #overlay .btn:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(255,215,0,0.5); }
   #overlay .btn:active { transform: scale(0.95); }
 
-  /* 烟花 */
   .confetti {
     position: fixed;
     pointer-events: none;
     z-index: 100;
   }
 
-  /* 响应式 */
   @media (max-width: 500px) {
     #gameContainer { padding: 10px; border-radius: 14px; }
     #gameTitle { font-size: 16px; margin-bottom: 4px; }
@@ -362,18 +359,19 @@
     #stats span { padding: 3px 8px; }
     #gameArea { gap: 6px; flex-direction: column; align-items: center; }
     #leftPanel { flex-direction: row; gap: 8px; }
-    #refImage { width: 40px; height: 40px; }
+    #refImage { width: 36px; height: 36px; }
     #piecesPanel { max-height: none; width: 100%; }
     #piecesGrid { max-height: 200px; }
-    #startOverlay h2 { font-size: 20px; }
-    #sizeSelect button { padding: 5px 12px; font-size: 12px; }
+    #startOverlay h2 { font-size: 18px; }
+    #sizeSelect button { padding: 5px 10px; font-size: 12px; }
+    #themeSelect button { padding: 4px 10px; font-size: 11px; }
   }
 </style>
 </head>
 <body>
 
 <div id="gameContainer">
-  <div id="gameTitle">🐾 拼拼图</div>
+  <div id="gameTitle">🧩 拼拼图</div>
 
   <div id="topBar">
     <div id="topBarLeft">
@@ -391,13 +389,10 @@
   </div>
 
   <div id="gameArea">
-    <!-- 左：参考图 + 拼图框 -->
     <div id="leftPanel">
-      <img id="refImage" src="" alt="参考图" title="点击查看大图">
       <div id="gridFrame"></div>
     </div>
 
-    <!-- 右：碎片区 -->
     <div id="piecesPanel">
       <div class="panel-title">碎片区</div>
       <div id="piecesGrid"></div>
@@ -411,50 +406,51 @@
   </div>
 
   <div id="startOverlay">
-    <h2>🐾 拼拼图</h2>
-    <p>选择拼图尺寸开始</p>
+    <h2>🧩 拼拼图</h2>
+    <p>选择主题和尺寸开始</p>
+    <div id="themeSelect">
+      <button class="active" onclick="selectTheme('animal')">🐾 动物</button>
+      <button onclick="selectTheme('number')">🔢 数字</button>
+      <button onclick="selectTheme('letter')">🔤 字母</button>
+      <button onclick="selectTheme('country')">🌍 国家</button>
+    </div>
     <div id="sizeSelect">
-      <button class="s4"  onclick="startGame(4)">4×4 简单</button>
-      <button class="s6"  onclick="startGame(6)">6×6 普通</button>
-      <button class="s9"  onclick="startGame(9)">9×9 困难</button>
-      <button class="s10" onclick="startGame(10)">10×10 挑战</button>
+      <button onclick="startGame(4)">4×4 简单</button>
+      <button onclick="startGame(6)">6×6 普通</button>
+      <button onclick="startGame(9)">9×9 困难</button>
+      <button onclick="startGame(10)">10×10 挑战</button>
+      <button onclick="startGame(15)">15×15 终极</button>
     </div>
     <p style="margin-top:6px;font-size:11px;color:rgba(255,255,255,0.4);">点击碎片选中，再点击拼图框放置</p>
   </div>
 </div>
 
 <script>
-// ============================================================
-//  拼拼图
-// ============================================================
-
-// ------ DOM ------
 const boardEl = document.getElementById('gridFrame');
 const piecesGrid = document.getElementById('piecesGrid');
 const placedCountEl = document.getElementById('placedCount');
 const totalCountEl = document.getElementById('totalCount');
 const timerEl = document.getElementById('timer');
-const refImg = document.getElementById('refImage');
 const overlay = document.getElementById('overlay');
 const startOverlay = document.getElementById('startOverlay');
 const finalStats = document.getElementById('finalStats');
+const themeBtns = document.querySelectorAll('#themeSelect button');
 
-// ------ 状态 ------
-let gridSize = 4;        // N×N
+let gridSize = 4;
 let totalPieces = 16;
-let pieceSize = 80;       // 拼图框每格像素
-let thumbSize = 48;       // 碎片区每格像素
-let placed = [];          // placed[row][col] = pieceData or null
-let pieces = [];          // {id, row, col}
-let shuffledIds = [];     // 打乱后的 id 顺序
-let selectedId = -1;      // 当前选中的碎片 id
+let pieceSize = 80;
+let thumbSize = 48;
+let placed = [];
+let pieces = [];
+let shuffledIds = [];
+let selectedId = -1;
 let refImgUrl = '';
 let timer = 0;
 let timerInterval = null;
 let isPlaying = false;
 let isStarted = false;
+let currentTheme = 'animal';
 
-// ------ 音效 ------
 const PuzzleAudio = (() => {
   let ctx = null;
   function init() {
@@ -467,176 +463,758 @@ const PuzzleAudio = (() => {
     const gain = ctx.createGain();
     osc.type = type || 'sine';
     osc.frequency.value = freq;
-    gain.gain.setValueAtTime(vol || 0.08, ctx.currentTime);
+    gain.gain.setValueAtTime(vol || 0.3, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
     osc.connect(gain);
     gain.connect(ctx.destination);
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + duration);
   }
+  function playClick() {
+    if (!ctx) return;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(800, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.08);
+    gain.gain.setValueAtTime(0.35, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.08);
+  }
+  function playPlace() {
+    if (!ctx) return;
+    playTone(880, 0.05, 'sine', 0.3);
+    setTimeout(() => playTone(1100, 0.1, 'sine', 0.25), 30);
+  }
+  function playRemove() {
+    if (!ctx) return;
+    playTone(440, 0.08, 'triangle', 0.25);
+    setTimeout(() => playTone(330, 0.1, 'triangle', 0.2), 40);
+  }
+  function playVictory() {
+    if (!ctx) return;
+    const notes = [523, 659, 784, 1047, 1318, 1047, 784, 659, 523];
+    notes.forEach((f, i) => setTimeout(() => playTone(f, 0.25, 'sine', 0.4), i * 100));
+    setTimeout(() => {
+      [523, 659, 784, 1047, 1318].forEach((f, i) => setTimeout(() => playTone(f, 0.3, 'sine', 0.3), i * 80));
+    }, notes.length * 100 + 200);
+  }
   return {
     init() { init(); },
-    place() { init(); playTone(800, 0.08, 'sine', 0.06); },
-    error() { init(); playTone(200, 0.12, 'square', 0.05); },
-    victory() {
-      init();
-      [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => playTone(f, 0.25, 'sine', 0.1), i * 100));
-    }
+    select() { init(); playClick(); },
+    place() { init(); playPlace(); },
+    remove() { init(); playRemove(); },
+    victory() { init(); playVictory(); }
   };
 })();
 
-// ------ 图片生成 ------
-
-function getAnimalImageUrl() {
-  const prompt = 'cute+watercolor+animal+illustration+colorful+woodland+creatures+flat+design+simple+clear+shapes+high+contrast';
-  return `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${prompt}&image_size=square_hd`;
+function selectTheme(theme) {
+  currentTheme = theme;
+  themeBtns.forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
 }
 
-// Canvas 后备图案（当 API 图片加载失败时使用）
-function generateFallbackImage(size) {
+function getThemeImageUrl() {
+  const themes = {
+    animal: [
+      'happy+cartoon+zoo+scene+multiple+cute+animals+elephant+lion+giraffe+monkey+colorful+kids+illustration+no+text',
+      'adorable+cartoon+forest+animals+scene+squirrel+deer+rabbit+owl+mushrooms+flowers+colorful+no+text',
+      'colorful+cartoon+underwater+scene+fish+dolphin+turtle+octopus+coral+reef+bubbles+no+text',
+      'cheerful+cartoon+farm+scene+cow+pig+sheep+chicken+goat+barn+green+grass+no+text',
+      'playful+cartoon+arctic+scene+polar+bear+penguin+seal+icebergs+snow+colorful+no+text',
+      'beautiful+cartoon+jungle+scene+tropical+birds+parrot+butterfly+exotic+flowers+no+text',
+      'cute+cartoon+pet+shop+scene+cat+dog+rabbit+hamster+colorful+kawaii+style+no+text',
+      'funny+cartoon+insect+world+butterfly+ladybug+bee+ant+flower+garden+no+text',
+      'magical+cartoon+fantasy+animal+scene+unicorn+dragon+pegasus+fairy+sparkles+no+text',
+      'colorful+cartoon+aquarium+scene+tropical+fish+shark+ray+seaweed+colorful+no+text'
+    ],
+    number: [
+      'colorful+cartoon+number+landscape+numbers+12345+in+nature+hills+trees+clouds+bright+no+text',
+      'fun+cartoon+math+world+numbers+plus+minus+multiply+divide+colorful+blocks+floating+no+text',
+      'rainbow+cartoon+number+scene+numbers+1234567890+colorful+gradient+sky+clouds+no+text',
+      'playful+cartoon+number+adventure+numbers+on+rocks+in+forest+colorful+kids+no+text',
+      'cute+cartoon+number+party+numbers+12345+balloons+confetti+cake+celebration+no+text',
+      'colorful+cartoon+space+numbers+astronaut+numbers+rocket+planets+stars+no+text',
+      'happy+cartoon+ocean+numbers+numbers+floating+in+water+bubbles+fish+no+text',
+      'bright+cartoon+number+garden+numbers+on+flowers+sun+butterflies+colorful+no+text',
+      'cheerful+cartoon+music+numbers+musical+notes+numbers+instruments+rainbow+no+text',
+      'colorful+cartoon+construction+numbers+building+blocks+numbers+hard+hat+tools+no+text'
+    ],
+    letter: [
+      'colorful+cartoon+alphabet+garden+ABC+letters+on+flowers+sun+butterflies+no+numbers',
+      'cute+cartoon+alphabet+jungle+ABC+letters+with+animals+A+ant+B+bear+C+cat+no+numbers',
+      'rainbow+cartoon+alphabet+sky+ABC+letters+floating+clouds+stars+colorful+no+numbers',
+      'happy+cartoon+alphabet+ocean+ABC+letters+shells+waves+fish+submarine+no+numbers',
+      'bright+cartoon+alphabet+space+ABC+letters+rockets+planets+stars+no+numbers',
+      'colorful+cartoon+alphabet+forest+ABC+letters+trees+animals+mushrooms+no+numbers',
+      'fun+cartoon+alphabet+party+ABC+letters+balloons+confetti+cake+no+numbers',
+      'cute+cartoon+alphabet+winter+ABC+letters+snowflakes+snowman+no+numbers',
+      'playful+cartoon+alphabet+farm+ABC+letters+farm+animals+hay+barn+no+numbers',
+      'colorful+cartoon+alphabet+candy+land+ABC+letters+candy+ice+cream+rainbow+no+numbers'
+    ],
+    country: [
+      'colorful+cartoon+world+map+continents+oceans+countries+no+text+kids+geography',
+      'happy+cartoon+world+landmarks+eiffel+tower+great+wall+pyramid+statue+liberty+colorful+no+text',
+      'colorful+cartoon+international+food+pizza+sushi+taco+croissant+dumplings+global+no+text',
+      'cute+cartoon+world+animals+kangaroo+giraffe+panda+koala+elephant+colorful+no+text',
+      'colorful+cartoon+world+flags+arranged+beautifully+rainbow+colors+no+text',
+      'happy+cartoon+world+cities+skyline+tokyo+paris+new+york+london+colorful+no+text',
+      'colorful+cartoon+cultural+symbols+kimono+sari+suit+sombrero+traditional+dress+no+text',
+      'fun+cartoon+world+festivals+celebrations+different+countries+flags+dance+no+text',
+      'colorful+cartoon+world+sports+olympics+athletes+flags+medals+no+text',
+      'cute+cartoon+world+plants+flowers+rose+lotus+cherry+blossom+tulip+no+text'
+    ]
+  };
+  const promptList = themes[currentTheme] || themes.animal;
+  const prompt = promptList[Math.floor(Math.random() * promptList.length)];
+  const randomSeed = Math.floor(Math.random() * 1000000);
+  return `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${prompt}&image_size=square_hd&seed=${randomSeed}&_t=${Date.now()}`;
+}
+
+function generateThemeImage(size) {
   const c = document.createElement('canvas');
   c.width = size;
   c.height = size;
   const ctx = c.getContext('2d');
 
-  // 渐变背景
-  const grad = ctx.createLinearGradient(0, 0, size, size);
-  grad.addColorStop(0, '#11998e');
-  grad.addColorStop(0.5, '#38ef7d');
-  grad.addColorStop(1, '#38b0ef');
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, size, size);
+  function drawGradientBackground(bgColors) {
+    const grad = ctx.createLinearGradient(0, 0, size, size);
+    grad.addColorStop(0, bgColors[0]);
+    if (bgColors.length === 3) {
+      grad.addColorStop(0.5, bgColors[1]);
+      grad.addColorStop(1, bgColors[2]);
+    } else {
+      grad.addColorStop(1, bgColors[1]);
+    }
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, size, size);
+  }
 
-  // 动物图案（简单的小动物）
-  ctx.save();
-  // 身体
-  ctx.fillStyle = '#FFD700';
-  const cx = size/2, cy = size/2;
-  ctx.beginPath();
-  ctx.ellipse(cx, cy+5, size*0.3, size*0.22, 0, 0, Math.PI*2);
-  ctx.fill();
-
-  // 头
-  ctx.fillStyle = '#FFA500';
-  ctx.beginPath();
-  ctx.arc(cx, cy-15, size*0.16, 0, Math.PI*2);
-  ctx.fill();
-
-  // 耳朵
-  ctx.beginPath();
-  ctx.ellipse(cx-12, cy-30, 6, 10, -0.3, 0, Math.PI*2);
-  ctx.ellipse(cx+12, cy-30, 6, 10, 0.3, 0, Math.PI*2);
-  ctx.fillStyle = '#E67E22';
-  ctx.fill();
-
-  // 眼睛
-  ctx.fillStyle = '#333';
-  ctx.beginPath();
-  ctx.arc(cx-6, cy-17, 3, 0, Math.PI*2);
-  ctx.arc(cx+6, cy-17, 3, 0, Math.PI*2);
-  ctx.fill();
-  ctx.fillStyle = '#fff';
-  ctx.beginPath();
-  ctx.arc(cx-5, cy-19, 1.2, 0, Math.PI*2);
-  ctx.arc(cx+7, cy-19, 1.2, 0, Math.PI*2);
-  ctx.fill();
-
-  // 鼻子
-  ctx.fillStyle = '#FF6B6B';
-  ctx.beginPath();
-  ctx.arc(cx, cy-12, 2.5, 0, Math.PI*2);
-  ctx.fill();
-
-  // 嘴巴
-  ctx.strokeStyle = '#333';
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  ctx.arc(cx-3, cy-10, 3, 0, Math.PI*0.5);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.arc(cx+3, cy-10, 3, Math.PI*0.5, Math.PI);
-  ctx.stroke();
-
-  // 胡须
-  ctx.strokeStyle = 'rgba(255,255,255,0.5)';
-  ctx.lineWidth = 1;
-  for (let side = -1; side <= 1; side += 2) {
-    for (let i = 0; i < 3; i++) {
+  function drawSun(x, y, r) {
+    ctx.fillStyle = '#FFD700';
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI*2);
+    ctx.fill();
+    ctx.strokeStyle = '#FFD700';
+    ctx.lineWidth = r * 0.15;
+    for (let i = 0; i < 12; i++) {
+      const angle = (i / 12) * Math.PI * 2;
+      const x1 = x + Math.cos(angle) * r * 1.3;
+      const y1 = y + Math.sin(angle) * r * 1.3;
+      const x2 = x + Math.cos(angle) * r * 1.6;
+      const y2 = y + Math.sin(angle) * r * 1.6;
       ctx.beginPath();
-      ctx.moveTo(cx + side*8, cy-14 + i*4);
-      ctx.lineTo(cx + side*25, cy-18 + i*6);
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
       ctx.stroke();
     }
   }
 
-  // 尾巴
-  ctx.strokeStyle = '#E67E22';
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.moveTo(cx+size*0.3, cy+5);
-  ctx.quadraticCurveTo(cx+size*0.4, cy-15, cx+size*0.35, cy-25);
-  ctx.stroke();
+  function drawCloud(x, y, s) {
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(x, y, s, 0, Math.PI*2);
+    ctx.arc(x + s * 0.8, y - s * 0.2, s * 0.8, 0, Math.PI*2);
+    ctx.arc(x + s * 1.6, y, s * 0.9, 0, Math.PI*2);
+    ctx.fill();
+  }
 
-  ctx.restore();
+  function drawTree(x, y, h) {
+    ctx.fillStyle = '#8B4513';
+    ctx.fillRect(x - h * 0.08, y, h * 0.16, h * 0.3);
+    ctx.fillStyle = '#228B22';
+    ctx.beginPath();
+    ctx.moveTo(x, y - h);
+    ctx.lineTo(x - h * 0.4, y - h * 0.3);
+    ctx.lineTo(x + h * 0.4, y - h * 0.3);
+    ctx.closePath();
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(x, y - h * 0.7);
+    ctx.lineTo(x - h * 0.5, y);
+    ctx.lineTo(x + h * 0.5, y);
+    ctx.closePath();
+    ctx.fill();
+  }
 
-  // 随机装饰
-  for (let i = 0; i < 15; i++) {
-    const x = Math.random() * size;
-    const y = Math.random() * size;
-    const r = 2 + Math.random() * 4;
-    ctx.fillStyle = `hsla(${Math.random()*360}, 80%, 70%, 0.4)`;
+  function drawGrass() {
+    const grassH = size * 0.2;
+    for (let i = 0; i < size; i += grassH * 0.2) {
+      const gw = grassH * 0.12 + Math.random() * grassH * 0.08;
+      const gh = grassH * 0.4 + Math.random() * grassH * 0.2;
+      ctx.fillStyle = '#32CD32';
+      ctx.beginPath();
+      ctx.moveTo(i, size - grassH);
+      ctx.quadraticCurveTo(i + gw * 0.5, size - grassH - gh, i + gw, size - grassH);
+      ctx.fill();
+    }
+  }
+
+  function drawEmoji(x, y, emoji, size) {
+    ctx.font = `${size}px "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", "EmojiOne Color", "Android Emoji", sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(emoji, x, y);
+  }
+
+  function drawPatternCircle(x, y, r, color) {
+    ctx.fillStyle = color;
     ctx.beginPath();
     ctx.arc(x, y, r, 0, Math.PI*2);
     ctx.fill();
   }
 
-  // 底部文字
-  ctx.fillStyle = 'rgba(255,255,255,0.6)';
-  ctx.font = `bold ${size*0.07}px sans-serif`;
-  ctx.textAlign = 'center';
-  ctx.fillText('🐱 拼拼图', size/2, size-15);
+  function drawPatternDiamond(x, y, size, color) {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(x, y - size);
+    ctx.lineTo(x + size, y);
+    ctx.lineTo(x, y + size);
+    ctx.lineTo(x - size, y);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  function drawPatternTriangle(x, y, size, color) {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(x, y - size);
+    ctx.lineTo(x - size, y + size);
+    ctx.lineTo(x + size, y + size);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  function drawPatternSquare(x, y, size, color) {
+    ctx.fillStyle = color;
+    ctx.fillRect(x - size, y - size, size * 2, size * 2);
+  }
+
+  function drawColorfulText(x, y, text, size, color) {
+    ctx.fillStyle = color;
+    ctx.font = `bold ${size}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = 'rgba(0,0,0,0.15)';
+    ctx.shadowBlur = 4;
+    ctx.shadowOffsetY = 2;
+    ctx.fillText(text, x, y);
+    ctx.shadowColor = 'transparent';
+  }
+
+  if (currentTheme === 'animal') {
+    const scenes = [
+      { name: 'space', bg: ['#1A237E', '#7B1FA2', '#FFD700'], emoji: ['🚀', '🛸', '👽', '⭐', '🌙', '🌠'], decor: 'space' },
+      { name: 'sky', bg: ['#87CEEB', '#E0F6FF', '#FFE4B5'], emoji: ['🐦', '🦅', '🦉', '🦜', '🕊️', '🦢'], decor: 'sky' },
+      { name: 'aquarium', bg: ['#00BCD4', '#FFEE58', '#FF7043'], emoji: ['🐬', '🐠', '🐙', '🦈', '🐋', '🦑'], decor: 'aquarium' },
+      { name: 'ocean', bg: ['#2196F3', '#4DD0E1', '#FF9800'], emoji: ['🐳', '🦭', '🐢', '🦀', '🐙', '🦐'], decor: 'ocean' },
+      { name: 'wild', bg: ['#4CAF50', '#FFEB3B', '#FF8A65'], emoji: ['🦁', '🐘', '🦒', '🦓', '🐆', '🐪'], decor: 'wild' },
+      { name: 'forest', bg: ['#2E7D32', '#81C784', '#FFD54F'], emoji: ['🐰', '🐻', '🦊', '🐿️', '🦔', '🦡'], decor: 'forest' },
+      { name: 'garden', bg: ['#C5E1A5', '#FFCDD2', '#FFD54F'], emoji: ['🦋', '🐝', '🐞', '🐢', '🐌', '🐦'], decor: 'garden' },
+      { name: 'night', bg: ['#1A237E', '#880E4F', '#FFD700'], emoji: ['🦉', '🦇', '🌙', '⭐', '🦝', '🦡'], decor: 'night' },
+      { name: 'desert', bg: ['#FFEB3B', '#FF8F00', '#78909C'], emoji: ['🦊', '🐪', '🐫', '🐍', '🦅', '🦉'], decor: 'desert' },
+      { name: 'arctic', bg: ['#E0F7FA', '#80DEEA', '#424242'], emoji: ['🐧', '🐻', '🦭', '🦉', '🐰', '🐾'], decor: 'arctic' }
+    ];
+    const scene = scenes[Math.floor(Math.random() * scenes.length)];
+    drawGradientBackground(scene.bg);
+
+    if (scene.decor === 'space') {
+      for (let i = 0; i < 35; i++) {
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(Math.random() * size, Math.random() * size, size * 0.005 + Math.random() * size * 0.02, 0, Math.PI*2);
+        ctx.fill();
+      }
+      for (let i = 0; i < 8; i++) {
+        ctx.fillStyle = '#FFD700';
+        ctx.beginPath();
+        ctx.arc(Math.random() * size, Math.random() * size, size * 0.01 + Math.random() * size * 0.015, 0, Math.PI*2);
+        ctx.fill();
+      }
+    } else if (scene.decor === 'sky') {
+      for (let i = 0; i < 6; i++) {
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.beginPath();
+        const cx = Math.random() * size;
+        const cy = Math.random() * size * 0.6;
+        ctx.arc(cx, cy, size * 0.08 + Math.random() * size * 0.12, 0, Math.PI*2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(cx + size * 0.05, cy + size * 0.02, size * 0.06 + Math.random() * size * 0.08, 0, Math.PI*2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(cx - size * 0.06, cy + size * 0.03, size * 0.05 + Math.random() * size * 0.06, 0, Math.PI*2);
+        ctx.fill();
+      }
+      ctx.fillStyle = '#FFD54F';
+      ctx.beginPath();
+      ctx.arc(size * 0.8, size * 0.15, size * 0.08, 0, Math.PI*2);
+      ctx.fill();
+    } else if (scene.decor === 'aquarium') {
+      for (let i = 0; i < 6; i++) {
+        ctx.fillStyle = 'rgba(255,255,255,0.3)';
+        ctx.beginPath();
+        ctx.arc(Math.random() * size, Math.random() * size, size * 0.02 + Math.random() * size * 0.03, 0, Math.PI*2);
+        ctx.fill();
+      }
+    } else if (scene.decor === 'ocean') {
+      for (let i = 0; i < 5; i++) {
+        ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        const wx = Math.random() * size;
+        const wy = Math.random() * size;
+        ctx.moveTo(wx, wy);
+        ctx.quadraticCurveTo(wx + size * 0.15, wy - size * 0.02, wx + size * 0.3, wy);
+        ctx.stroke();
+      }
+    } else if (scene.decor === 'wild') {
+      ctx.fillStyle = '#4CAF50';
+      ctx.fillRect(0, size * 0.75, size, size * 0.25);
+    } else if (scene.decor === 'forest') {
+      for (let i = 0; i < 4; i++) {
+        ctx.fillStyle = '#2E7D32';
+        ctx.beginPath();
+        const tx = Math.random() * size;
+        const ty = size * 0.4 + Math.random() * size * 0.5;
+        ctx.arc(tx, ty - size * 0.08, size * 0.1, 0, Math.PI*2);
+        ctx.fill();
+      }
+    } else if (scene.decor === 'garden') {
+      for (let i = 0; i < 8; i++) {
+        ctx.fillStyle = ['#FF69B4', '#FFD700', '#FFA500'][Math.floor(Math.random() * 3)];
+        ctx.beginPath();
+        ctx.arc(Math.random() * size, Math.random() * size, size * 0.025, 0, Math.PI*2);
+        ctx.fill();
+      }
+    } else if (scene.decor === 'night') {
+      for (let i = 0; i < 30; i++) {
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(Math.random() * size, Math.random() * size, size * 0.005 + Math.random() * size * 0.015, 0, Math.PI*2);
+        ctx.fill();
+      }
+      ctx.fillStyle = '#F5F5DC';
+      ctx.beginPath();
+      ctx.arc(size * 0.8, size * 0.15, size * 0.07, 0, Math.PI*2);
+      ctx.fill();
+    } else if (scene.decor === 'desert') {
+      for (let i = 0; i < 3; i++) {
+        ctx.fillStyle = '#8D6E63';
+        const cx = Math.random() * size;
+        const cy = size * 0.5 + Math.random() * size * 0.4;
+        ctx.fillRect(cx - size * 0.015, cy, size * 0.03, size * 0.18);
+        ctx.fillStyle = '#4CAF50';
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx - size * 0.05, cy - size * 0.12);
+        ctx.lineTo(cx + size * 0.05, cy - size * 0.12);
+        ctx.closePath();
+        ctx.fill();
+      }
+    } else if (scene.decor === 'arctic') {
+      ctx.fillStyle = '#B0BEC5';
+      ctx.beginPath();
+      ctx.moveTo(0, size * 0.5);
+      ctx.quadraticCurveTo(size * 0.5, size * 0.3, size, size * 0.5);
+      ctx.lineTo(size, size);
+      ctx.lineTo(0, size);
+      ctx.closePath();
+      ctx.fill();
+      for (let i = 0; i < 15; i++) {
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(Math.random() * size, Math.random() * size * 0.6, size * 0.005 + Math.random() * size * 0.01, 0, Math.PI*2);
+        ctx.fill();
+      }
+    }
+
+    const shuffledEmoji = scene.emoji.sort(() => Math.random() - 0.5);
+    for (let i = 0; i < shuffledEmoji.length; i++) {
+      const x = Math.random() * size;
+      const y = Math.random() * size;
+      const emojiSize = size * 0.1 + Math.random() * size * 0.08;
+      drawEmoji(x, y, shuffledEmoji[i], emojiSize);
+    }
+  } else if (currentTheme === 'number') {
+    const scenes = [
+      { name: 'space', bg: ['#1A237E', '#7B1FA2', '#FFD700'], colors: ['#FFD700', '#FF69B4', '#00BCD4', '#4CAF50', '#FF5722'], decor: 'space' },
+      { name: 'candy', bg: ['#FFCDD2', '#FFEE58', '#E91E63'], colors: ['#E53935', '#43A047', '#1E88E5', '#FB8C00', '#8E24AA'], decor: 'candy' },
+      { name: 'forest', bg: ['#2E7D32', '#81C784', '#FFD54F'], colors: ['#E53935', '#43A047', '#1E88E5', '#FB8C00', '#7B1FA2'], decor: 'forest' },
+      { name: 'ocean', bg: ['#00BCD4', '#FFEE58', '#FF7043'], colors: ['#E53935', '#43A047', '#1E88E5', '#FB8C00', '#FF5722'], decor: 'ocean' },
+      { name: 'fire', bg: ['#FFECB3', '#FF7043', '#9C27B0'], colors: ['#FFEB3B', '#fff', '#E3F2FD', '#E1BEE7', '#FFCDD2'], decor: 'fire' },
+      { name: 'ice', bg: ['#E0F7FA', '#45B7D1', '#FF7043'], colors: ['#1E88E5', '#43A047', '#E53935', '#FB8C00', '#8E24AA'], decor: 'ice' },
+      { name: 'rainbow', bg: ['#FFEB3B', '#FF69B4', '#4ECDC4'], colors: ['#E53935', '#43A047', '#1E88E5', '#FB8C00', '#8E24AA', '#FF5722'], decor: 'rainbow' },
+      { name: 'galaxy', bg: ['#1A237E', '#FF69B4', '#FFD700'], colors: ['#FFD700', '#FF69B4', '#00BCD4', '#4CAF50', '#FF5722', '#FFEB3B'], decor: 'galaxy' }
+    ];
+    const scene = scenes[Math.floor(Math.random() * scenes.length)];
+    drawGradientBackground(scene.bg);
+
+
+
+    if (scene.decor === 'space') {
+      for (let i = 0; i < 20; i++) {
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(Math.random() * size, Math.random() * size, size * 0.005 + Math.random() * size * 0.015, 0, Math.PI*2);
+        ctx.fill();
+      }
+      for (let i = 0; i < 3; i++) {
+        const gx = Math.random() * size;
+        const gy = Math.random() * size;
+        const gr = size * 0.05 + Math.random() * size * 0.1;
+        const gradient = ctx.createRadialGradient(gx, gy, 0, gx, gy, gr);
+        gradient.addColorStop(0, 'rgba(138,43,226,0.3)');
+        gradient.addColorStop(1, 'rgba(138,43,226,0)');
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(gx, gy, gr, 0, Math.PI*2);
+        ctx.fill();
+      }
+    } else if (scene.decor === 'candy') {
+      for (let i = 0; i < 6; i++) {
+        const cx = Math.random() * size;
+        const cy = Math.random() * size;
+        const cr = size * 0.03 + Math.random() * size * 0.04;
+        ctx.fillStyle = ['#FF69B4', '#FFD700', '#00BCD4', '#FF5722'][Math.floor(Math.random() * 4)];
+        ctx.beginPath();
+        ctx.arc(cx, cy, cr, 0, Math.PI*2);
+        ctx.fill();
+      }
+    } else if (scene.decor === 'forest') {
+      for (let i = 0; i < 4; i++) {
+        ctx.fillStyle = '#2E7D32';
+        ctx.beginPath();
+        ctx.arc(Math.random() * size, size * 0.7 + Math.random() * size * 0.2, size * 0.05 + Math.random() * size * 0.05, 0, Math.PI*2);
+        ctx.fill();
+      }
+    } else if (scene.decor === 'ocean') {
+      for (let i = 0; i < 5; i++) {
+        ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        const wx = Math.random() * size;
+        const wy = Math.random() * size;
+        ctx.moveTo(wx, wy);
+        ctx.quadraticCurveTo(wx + size * 0.15, wy - size * 0.02, wx + size * 0.3, wy);
+        ctx.stroke();
+      }
+    } else if (scene.decor === 'fire') {
+      for (let i = 0; i < 5; i++) {
+        const fx = Math.random() * size;
+        const fy = size * 0.6 + Math.random() * size * 0.3;
+        ctx.fillStyle = `rgba(255, ${Math.floor(Math.random()*100)}, 0, 0.3)`;
+        ctx.beginPath();
+        ctx.arc(fx, fy, size * 0.05 + Math.random() * size * 0.05, 0, Math.PI*2);
+        ctx.fill();
+      }
+    } else if (scene.decor === 'ice') {
+      for (let i = 0; i < 6; i++) {
+        ctx.fillStyle = 'rgba(255,255,255,0.3)';
+        ctx.beginPath();
+        ctx.arc(Math.random() * size, Math.random() * size, size * 0.03 + Math.random() * size * 0.03, 0, Math.PI*2);
+        ctx.fill();
+      }
+    } else if (scene.decor === 'rainbow') {
+      for (let i = 0; i < 7; i++) {
+        ctx.strokeStyle = ['#FF0000', '#FF8C00', '#FFD700', '#00FF00', '#0080FF', '#4B0082', '#9400D3'][i];
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(size / 2, size * 1.5, size * (0.8 - i * 0.1), 0, Math.PI);
+        ctx.stroke();
+      }
+    } else if (scene.decor === 'galaxy') {
+      for (let i = 0; i < 30; i++) {
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(Math.random() * size, Math.random() * size, size * 0.003 + Math.random() * size * 0.01, 0, Math.PI*2);
+        ctx.fill();
+      }
+    }
+
+    const numbers = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
+    const shuffledNumbers = numbers.sort(() => Math.random() - 0.5);
+    const cols = 5;
+    const rows = 2;
+    const cellW = size / cols;
+    const cellH = size * 0.65 / rows;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const idx = r * cols + c;
+        const x = c * cellW + cellW / 2;
+        const y = size * 0.15 + r * cellH + cellH / 2;
+        drawColorfulText(x, y, shuffledNumbers[idx], size * 0.12, scene.colors[idx % scene.colors.length]);
+      }
+    }
+
+    const patternCount = Math.floor(Math.random() * 6) + 3;
+    for (let i = 0; i < patternCount; i++) {
+      const px = Math.random() * size;
+      const py = Math.random() * size * 0.7 + size * 0.15;
+      const ps = size * 0.02 + Math.random() * size * 0.04;
+      drawPatternCircle(px, py, ps, `rgba(${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)}, 0.4)`);
+    }
+  } else if (currentTheme === 'letter') {
+    const scenes = [
+      { name: 'garden', bg: ['#C5E1A5', '#FFCDD2', '#FFD54F'], colors: ['#E53935', '#43A047', '#1E88E5', '#FB8C00', '#8E24AA', '#FF5722'], decor: 'garden' },
+      { name: 'candy', bg: ['#FFCDD2', '#FFEE58', '#E91E63'], colors: ['#E53935', '#43A047', '#1E88E5', '#FB8C00', '#8E24AA', '#FF5722'], decor: 'candy' },
+      { name: 'space', bg: ['#1A237E', '#7B1FA2', '#FFD700'], colors: ['#FFD700', '#FF69B4', '#00BCD4', '#4CAF50', '#FF5722', '#FFEB3B'], decor: 'space' },
+      { name: 'ocean', bg: ['#00BCD4', '#FFEE58', '#FF7043'], colors: ['#E53935', '#43A047', '#1E88E5', '#FB8C00', '#8E24AA', '#FFEB3B'], decor: 'ocean' },
+      { name: 'desert', bg: ['#FFEB3B', '#FF8F00', '#78909C'], colors: ['#E53935', '#43A047', '#1E88E5', '#FB8C00', '#8E24AA', '#7B1FA2'], decor: 'desert' },
+      { name: 'forest', bg: ['#2E7D32', '#81C784', '#FFD54F'], colors: ['#E53935', '#43A047', '#1E88E5', '#FB8C00', '#8E24AA', '#FF5722'], decor: 'forest' },
+      { name: 'fire', bg: ['#FFECB3', '#FF7043', '#9C27B0'], colors: ['#FFEB3B', '#fff', '#E3F2FD', '#E1BEE7', '#FFCDD2', '#FFF3E0'], decor: 'fire' },
+      { name: 'ice', bg: ['#E0F7FA', '#45B7D1', '#FF7043'], colors: ['#1E88E5', '#43A047', '#E53935', '#FB8C00', '#8E24AA', '#7B1FA2'], decor: 'ice' }
+    ];
+    const scene = scenes[Math.floor(Math.random() * scenes.length)];
+    drawGradientBackground(scene.bg);
+
+
+
+    if (scene.decor === 'garden') {
+      for (let i = 0; i < 8; i++) {
+        const fx = Math.random() * size;
+        const fy = size * 0.5 + Math.random() * size * 0.4;
+        ctx.fillStyle = ['#FF69B4', '#FF1493', '#FFD700', '#FFA500'][Math.floor(Math.random() * 4)];
+        ctx.beginPath();
+        ctx.arc(fx, fy, size * 0.02, 0, Math.PI*2);
+        ctx.fill();
+      }
+    } else if (scene.decor === 'candy') {
+      for (let i = 0; i < 5; i++) {
+        ctx.fillStyle = ['#FFD700', '#00BCD4', '#FF5722', '#9C27B0'][Math.floor(Math.random() * 4)];
+        ctx.beginPath();
+        ctx.arc(Math.random() * size, Math.random() * size, size * 0.03 + Math.random() * size * 0.03, 0, Math.PI*2);
+        ctx.fill();
+      }
+    } else if (scene.decor === 'space') {
+      for (let i = 0; i < 20; i++) {
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(Math.random() * size, Math.random() * size, size * 0.005 + Math.random() * size * 0.015, 0, Math.PI*2);
+        ctx.fill();
+      }
+    } else if (scene.decor === 'ocean') {
+      for (let i = 0; i < 4; i++) {
+        ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        const wx = Math.random() * size;
+        const wy = Math.random() * size;
+        ctx.moveTo(wx, wy);
+        ctx.quadraticCurveTo(wx + size * 0.12, wy - size * 0.02, wx + size * 0.24, wy);
+        ctx.stroke();
+      }
+    } else if (scene.decor === 'desert') {
+      for (let i = 0; i < 3; i++) {
+        ctx.fillStyle = '#E65100';
+        ctx.beginPath();
+        const sx = Math.random() * size;
+        const sy = size * 0.5 + Math.random() * size * 0.4;
+        ctx.moveTo(sx - size * 0.12, sy);
+        ctx.quadraticCurveTo(sx, sy - size * 0.1, sx + size * 0.12, sy);
+        ctx.lineTo(sx + size * 0.12, sy + size * 0.06);
+        ctx.quadraticCurveTo(sx, sy + size * 0.03, sx - size * 0.12, sy + size * 0.06);
+        ctx.closePath();
+        ctx.fill();
+      }
+    } else if (scene.decor === 'forest') {
+      for (let i = 0; i < 4; i++) {
+        ctx.fillStyle = '#2E7D32';
+        ctx.beginPath();
+        ctx.arc(Math.random() * size, size * 0.7 + Math.random() * size * 0.2, size * 0.04 + Math.random() * size * 0.04, 0, Math.PI*2);
+        ctx.fill();
+      }
+    } else if (scene.decor === 'fire') {
+      for (let i = 0; i < 4; i++) {
+        ctx.fillStyle = `rgba(255, ${Math.floor(Math.random()*80)}, 0, 0.3)`;
+        ctx.beginPath();
+        ctx.arc(Math.random() * size, size * 0.6 + Math.random() * size * 0.3, size * 0.04 + Math.random() * size * 0.04, 0, Math.PI*2);
+        ctx.fill();
+      }
+    } else if (scene.decor === 'ice') {
+      for (let i = 0; i < 5; i++) {
+        ctx.fillStyle = 'rgba(255,255,255,0.3)';
+        ctx.beginPath();
+        ctx.arc(Math.random() * size, Math.random() * size, size * 0.02 + Math.random() * size * 0.02, 0, Math.PI*2);
+        ctx.fill();
+      }
+    }
+
+    const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'];
+    const shuffledLetters = letters.sort(() => Math.random() - 0.5);
+    const cols = 5;
+    const rows = 3;
+    const cellW = size / cols;
+    const cellH = size * 0.6 / rows;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const idx = r * cols + c;
+        const x = c * cellW + cellW / 2;
+        const y = size * 0.12 + r * cellH + cellH / 2;
+        drawColorfulText(x, y, shuffledLetters[idx], size * 0.1, scene.colors[idx % scene.colors.length]);
+      }
+    }
+
+    const patternCount = Math.floor(Math.random() * 8) + 4;
+    for (let i = 0; i < patternCount; i++) {
+      const px = Math.random() * size;
+      const py = Math.random() * size * 0.7 + size * 0.12;
+      const ps = size * 0.02 + Math.random() * size * 0.03;
+      drawPatternDiamond(px, py, ps, `rgba(${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)}, 0.3)`);
+    }
+  } else if (currentTheme === 'country') {
+    const scenes = [
+      { name: 'space', bg: ['#1A237E', '#7B1FA2', '#FFD700'], emoji: ['🇨🇳', '🇺🇸', '🇯🇵', '🇬🇧', '🇫🇷', '🇩🇪'], decor: 'space' },
+      { name: 'garden', bg: ['#C5E1A5', '#FFCDD2', '#FFD54F'], emoji: ['🇮🇹', '🇧🇷', '🇨🇦', '🇦🇺', '🇷🇺', '🇮🇳'], decor: 'garden' },
+      { name: 'ocean', bg: ['#00BCD4', '#FFEE58', '#FF7043'], emoji: ['🇰🇷', '🇹🇭', '🇲🇽', '🇪🇸', '🇵🇹', '🇳🇱'], decor: 'ocean' },
+      { name: 'desert', bg: ['#FFEB3B', '#FF8F00', '#78909C'], emoji: ['🇨🇳', '🇯🇵', '🇰🇷', '🇨🇦', '🇦🇺', '🇬🇧'], decor: 'desert' },
+      { name: 'forest', bg: ['#2E7D32', '#81C784', '#FFD54F'], emoji: ['🇺🇸', '🇫🇷', '🇩🇪', '🇮🇹', '🇧🇷', '🇷🇺'], decor: 'forest' },
+      { name: 'candy', bg: ['#FFCDD2', '#FFEE58', '#E91E63'], emoji: ['🇯🇵', '🇹🇭', '🇮🇳', '🇪🇸', '🇵🇹', '🇳🇱'], decor: 'candy' },
+      { name: 'fire', bg: ['#FFECB3', '#FF7043', '#9C27B0'], emoji: ['🇨🇳', '🇺🇸', '🇯🇵', '🇬🇧', '🇫🇷', '🇩🇪'], decor: 'fire' },
+      { name: 'ice', bg: ['#E0F7FA', '#45B7D1', '#FF7043'], emoji: ['🇰🇷', '🇹🇭', '🇮🇳', '🇨🇦', '🇦🇺', '🇮🇹'], decor: 'ice' }
+    ];
+    const scene = scenes[Math.floor(Math.random() * scenes.length)];
+    drawGradientBackground(scene.bg);
+
+
+
+    if (scene.decor === 'space') {
+      for (let i = 0; i < 20; i++) {
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(Math.random() * size, Math.random() * size, size * 0.005 + Math.random() * size * 0.015, 0, Math.PI*2);
+        ctx.fill();
+      }
+    } else if (scene.decor === 'garden') {
+      for (let i = 0; i < 6; i++) {
+        ctx.fillStyle = ['#FF69B4', '#FF1493', '#FFD700', '#FFA500'][Math.floor(Math.random() * 4)];
+        ctx.beginPath();
+        ctx.arc(Math.random() * size, size * 0.5 + Math.random() * size * 0.4, size * 0.025, 0, Math.PI*2);
+        ctx.fill();
+      }
+    } else if (scene.decor === 'ocean') {
+      for (let i = 0; i < 4; i++) {
+        ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        const wx = Math.random() * size;
+        const wy = Math.random() * size;
+        ctx.moveTo(wx, wy);
+        ctx.quadraticCurveTo(wx + size * 0.12, wy - size * 0.02, wx + size * 0.24, wy);
+        ctx.stroke();
+      }
+    } else if (scene.decor === 'desert') {
+      for (let i = 0; i < 3; i++) {
+        ctx.fillStyle = '#E65100';
+        ctx.beginPath();
+        const sx = Math.random() * size;
+        const sy = size * 0.5 + Math.random() * size * 0.4;
+        ctx.moveTo(sx - size * 0.12, sy);
+        ctx.quadraticCurveTo(sx, sy - size * 0.1, sx + size * 0.12, sy);
+        ctx.lineTo(sx + size * 0.12, sy + size * 0.06);
+        ctx.quadraticCurveTo(sx, sy + size * 0.03, sx - size * 0.12, sy + size * 0.06);
+        ctx.closePath();
+        ctx.fill();
+      }
+    } else if (scene.decor === 'forest') {
+      for (let i = 0; i < 4; i++) {
+        ctx.fillStyle = '#2E7D32';
+        ctx.beginPath();
+        ctx.arc(Math.random() * size, size * 0.7 + Math.random() * size * 0.2, size * 0.04 + Math.random() * size * 0.04, 0, Math.PI*2);
+        ctx.fill();
+      }
+    } else if (scene.decor === 'candy') {
+      for (let i = 0; i < 5; i++) {
+        ctx.fillStyle = ['#FFD700', '#00BCD4', '#FF5722', '#9C27B0'][Math.floor(Math.random() * 4)];
+        ctx.beginPath();
+        ctx.arc(Math.random() * size, Math.random() * size, size * 0.03 + Math.random() * size * 0.03, 0, Math.PI*2);
+        ctx.fill();
+      }
+    } else if (scene.decor === 'fire') {
+      for (let i = 0; i < 4; i++) {
+        ctx.fillStyle = `rgba(255, ${Math.floor(Math.random()*80)}, 0, 0.3)`;
+        ctx.beginPath();
+        ctx.arc(Math.random() * size, size * 0.6 + Math.random() * size * 0.3, size * 0.04 + Math.random() * size * 0.04, 0, Math.PI*2);
+        ctx.fill();
+      }
+    } else if (scene.decor === 'ice') {
+      for (let i = 0; i < 5; i++) {
+        ctx.fillStyle = 'rgba(255,255,255,0.3)';
+        ctx.beginPath();
+        ctx.arc(Math.random() * size, Math.random() * size, size * 0.02 + Math.random() * size * 0.02, 0, Math.PI*2);
+        ctx.fill();
+      }
+    }
+
+    const shuffledEmoji = scene.emoji.sort(() => Math.random() - 0.5);
+    const cols = 3;
+    const rows = 2;
+    const cellW = size / cols;
+    const cellH = size * 0.6 / rows;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const idx = r * cols + c;
+        const x = c * cellW + cellW / 2;
+        const y = size * 0.2 + r * cellH + cellH / 2;
+        drawEmoji(x, y, shuffledEmoji[idx], size * 0.18);
+      }
+    }
+
+    const patternCount = Math.floor(Math.random() * 5) + 3;
+    for (let i = 0; i < patternCount; i++) {
+      const px = Math.random() * size * 0.8 + size * 0.1;
+      const py = Math.random() * size * 0.5 + size * 0.2;
+      const ps = size * 0.02 + Math.random() * size * 0.04;
+      const patterns = ['circle', 'diamond', 'triangle'];
+      const pType = patterns[Math.floor(Math.random() * patterns.length)];
+      if (pType === 'circle') drawPatternCircle(px, py, ps, `rgba(${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)}, 0.3)`);
+      else if (pType === 'diamond') drawPatternDiamond(px, py, ps, `rgba(${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)}, 0.3)`);
+      else drawPatternTriangle(px, py, ps, `rgba(${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)}, 0.3)`);
+    }
+  }
 
   return c.toDataURL('image/jpeg', 0.9);
 }
 
-// ------ 尺寸计算 ------
-
 function calcSizes() {
-  // 可用空间（更保守）
   const padding = window.innerWidth <= 500 ? 16 : 32;
   const availW = window.innerWidth - padding;
   const overheadH = window.innerHeight <= 600 ? 110 : 150;
   const availH = window.innerHeight - overheadH;
 
-  // 小屏幕纵向布局时，拼图框可获得更多宽度
   const isNarrow = window.innerWidth <= 560;
-  const gridMaxW = Math.floor(isNarrow ? Math.min(availW * 0.72, 300) : Math.min(availW * 0.42, 300));
-  const gridMaxH = Math.floor(Math.min(availH * 0.72, 300));
+  const gridMaxW = Math.floor(isNarrow ? Math.min(availW * 0.72, 350) : Math.min(availW * 0.5, 350));
+  const gridMaxH = Math.floor(Math.min(availH * 0.8, 350));
 
-  const gap = gridSize <= 4 ? 2 : 1;
+  const gap = 0;
   const maxDim = Math.min(gridMaxW, gridMaxH);
 
-  // 从较小的pieceSize开始，逐步增大直到接近maxDim
-  const minPiece = 10;
+  const minPiece = gridSize >= 15 ? 8 : (gridSize >= 10 ? 12 : 15);
   let bestPiece = minPiece;
   let bestBoard = 0;
-  for (let ps = minPiece; ps <= 80; ps++) {
-    const bp = ps * gridSize + (gridSize - 1) * gap + 4;
+  for (let ps = minPiece; ps <= 100; ps++) {
+    const bp = ps * gridSize + (gridSize - 1) * gap + 8;
     if (bp <= maxDim) { bestPiece = ps; bestBoard = bp; }
     else break;
   }
   pieceSize = bestPiece;
   const boardPx = bestBoard;
 
-  // 碎片区缩略图尺寸
+  const maxThumb = Math.min(pieceSize * 0.85, 50);
+  const minThumb = gridSize >= 15 ? 12 : 20;
+  
   if (isNarrow) {
-    // 纵向布局：碎片区在下方，按水平剩余宽度计算
-    const thumbAreaW = Math.max(availW - 12, 60);
-    thumbSize = Math.max(Math.min(Math.floor(thumbAreaW / (gridSize * 0.5 + 2)), pieceSize * 0.55, 42), 12);
+    const thumbAreaW = Math.max(availW - 12, 80);
+    const cols = Math.min(Math.floor(thumbAreaW / minThumb), gridSize >= 15 ? 8 : 6);
+    thumbSize = Math.max(Math.min(Math.floor(thumbAreaW / cols), maxThumb), minThumb);
   } else {
     const remainW = availW - boardPx - 16;
-    const thumbAreaW = Math.max(remainW, 60);
-    thumbSize = Math.max(Math.min(Math.floor(thumbAreaW / (gridSize * 0.4 + 2)), pieceSize * 0.6, 42), 12);
+    const thumbAreaW = Math.max(remainW, 80);
+    const cols = Math.min(Math.floor(thumbAreaW / minThumb), 5);
+    thumbSize = Math.max(Math.min(Math.floor(thumbAreaW / cols), maxThumb), minThumb);
   }
 
   return { gap, boardPx, slotSize: pieceSize };
@@ -651,30 +1229,102 @@ function applyBoardStyle() {
   boardEl.style.minWidth = boardPx + 'px';
 }
 
-// ------ 渲染 (overflow:hidden 裁剪方案) ------
-
 function createSliceEl(containerSize, row, col, isSlot) {
   const el = document.createElement('div');
+  el.className = 'puzzle-piece';
   el.style.width = containerSize + 'px';
   el.style.height = containerSize + 'px';
-  el.style.overflow = 'hidden';
-  el.style.position = 'relative';
-  el.style.borderRadius = '2px';
 
-  const img = document.createElement('img');
-  img.draggable = false;
-  img.src = refImgUrl;
-  // 图片尺寸 = 容器尺寸 × 网格数，使得一格正好显示一个切片
-  const fullSize = containerSize * gridSize;
-  img.style.width = fullSize + 'px';
-  img.style.height = fullSize + 'px';
-  img.style.position = 'absolute';
-  img.style.top = '0';
-  img.style.left = '0';
-  img.style.display = 'block';
-  // 将切片定位到正确位置
-  img.style.transform = `translate(-${col * containerSize}px, -${row * containerSize}px)`;
-  el.appendChild(img);
+  const k = Math.max(6, Math.floor(containerSize * 0.2));
+  const s = containerSize;
+  const cx = s / 2;
+  const cy = s / 2;
+
+  const isTop = row === 0;
+  const isBottom = row === gridSize - 1;
+  const isLeft = col === 0;
+  const isRight = col === gridSize - 1;
+  const evenCol = col % 2 === 0;
+  const evenRow = row % 2 === 0;
+
+  const hasTopKnob = !isTop && evenCol;
+  const hasBottomKnob = !isBottom && !evenCol;
+  const hasLeftKnob = !isLeft && !evenRow;
+  const hasRightKnob = !isRight && evenRow;
+
+  function pct(v) { return (v / s) * 100; }
+
+  const points = [];
+
+  points.push(`${pct(0)} ${pct(0)}`);
+  points.push(`${pct(cx - k)} ${pct(0)}`);
+
+  if (!isTop) {
+    if (hasTopKnob) {
+      points.push(`${pct(cx - k)} ${pct(-k)}`);
+      points.push(`${pct(cx)} ${pct(-k)}`);
+      points.push(`${pct(cx + k)} ${pct(-k)}`);
+    } else {
+      points.push(`${pct(cx - k)} ${pct(k)}`);
+      points.push(`${pct(cx)} ${pct(k)}`);
+      points.push(`${pct(cx + k)} ${pct(k)}`);
+    }
+  }
+  points.push(`${pct(cx + k)} ${pct(0)}`);
+
+  points.push(`${pct(s)} ${pct(0)}`);
+  points.push(`${pct(s)} ${pct(cy - k)}`);
+
+  if (!isRight) {
+    if (hasRightKnob) {
+      points.push(`${pct(s + k)} ${pct(cy - k)}`);
+      points.push(`${pct(s + k)} ${pct(cy)}`);
+      points.push(`${pct(s + k)} ${pct(cy + k)}`);
+    } else {
+      points.push(`${pct(s - k)} ${pct(cy - k)}`);
+      points.push(`${pct(s - k)} ${pct(cy)}`);
+      points.push(`${pct(s - k)} ${pct(cy + k)}`);
+    }
+  }
+  points.push(`${pct(s)} ${pct(cy + k)}`);
+
+  points.push(`${pct(s)} ${pct(s)}`);
+  points.push(`${pct(cx + k)} ${pct(s)}`);
+
+  if (!isBottom) {
+    if (hasBottomKnob) {
+      points.push(`${pct(cx + k)} ${pct(s + k)}`);
+      points.push(`${pct(cx)} ${pct(s + k)}`);
+      points.push(`${pct(cx - k)} ${pct(s + k)}`);
+    } else {
+      points.push(`${pct(cx + k)} ${pct(s - k)}`);
+      points.push(`${pct(cx)} ${pct(s - k)}`);
+      points.push(`${pct(cx - k)} ${pct(s - k)}`);
+    }
+  }
+  points.push(`${pct(cx - k)} ${pct(s)}`);
+
+  points.push(`${pct(0)} ${pct(s)}`);
+  points.push(`${pct(0)} ${pct(cy + k)}`);
+
+  if (!isLeft) {
+    if (hasLeftKnob) {
+      points.push(`${pct(-k)} ${pct(cy + k)}`);
+      points.push(`${pct(-k)} ${pct(cy)}`);
+      points.push(`${pct(-k)} ${pct(cy - k)}`);
+    } else {
+      points.push(`${pct(k)} ${pct(cy + k)}`);
+      points.push(`${pct(k)} ${pct(cy)}`);
+      points.push(`${pct(k)} ${pct(cy - k)}`);
+    }
+  }
+  points.push(`${pct(0)} ${pct(cy - k)}`);
+
+  el.style.clipPath = `polygon(${points.join(',')})`;
+  el.style.backgroundImage = `url(${refImgUrl})`;
+  el.style.backgroundSize = `${gridSize * 100}% ${gridSize * 100}%`;
+  el.style.backgroundPosition = `${col * (100 / (gridSize - 1))}% ${row * (100 / (gridSize - 1))}%`;
+
   return el;
 }
 
@@ -689,11 +1339,10 @@ function renderFrame() {
       slot.style.width = pieceSize + 'px';
       slot.style.height = pieceSize + 'px';
       slot.style.overflow = 'hidden';
-      slot.style.position = 'relative';
 
       if (placed[r][c]) {
-        slot.classList.add('filled');
-        slot.appendChild(createSliceEl(pieceSize, r, c, true));
+        const piece = placed[r][c];
+        slot.appendChild(createSliceEl(pieceSize, piece.row, piece.col, true));
       }
       boardEl.appendChild(slot);
     }
@@ -705,15 +1354,24 @@ function renderPieces() {
 
   shuffledIds.forEach(id => {
     const p = pieces[id];
-    if (placed[p.row][p.col]) return;
+    let isPlaced = false;
+    for (let r = 0; r < gridSize; r++) {
+      for (let c = 0; c < gridSize; c++) {
+        if (placed[r][c] && placed[r][c].id === id) {
+          isPlaced = true;
+          break;
+        }
+      }
+      if (isPlaced) break;
+    }
+    if (isPlaced) return;
 
     const el = document.createElement('div');
     el.className = 'piece';
     el.dataset.id = id;
     el.style.width = thumbSize + 'px';
     el.style.height = thumbSize + 'px';
-    el.style.overflow = 'hidden';
-    el.style.position = 'relative';
+    el.style.borderRadius = '4px';
 
     if (id === selectedId) el.classList.add('selected');
 
@@ -738,21 +1396,22 @@ function countPlaced() {
 }
 
 function isComplete() {
-  return countPlaced() === totalPieces;
+  if (countPlaced() !== totalPieces) return false;
+  for (let r = 0; r < gridSize; r++) {
+    for (let c = 0; c < gridSize; c++) {
+      const p = placed[r][c];
+      if (!p || p.row !== r || p.col !== c) return false;
+    }
+  }
+  return true;
 }
 
-// 重新打乱碎片顺序
 function shuffleIds() {
-  shuffleFisherYates(shuffledIds);
-}
-function shuffleFisherYates(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
+  for (let i = shuffledIds.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
+    [shuffledIds[i], shuffledIds[j]] = [shuffledIds[j], shuffledIds[i]];
   }
 }
-
-// ------ 交互 ------
 
 function onPieceClick(id) {
   if (!isPlaying) return;
@@ -762,59 +1421,52 @@ function onPieceClick(id) {
     return;
   }
   selectedId = id;
+  PuzzleAudio.select();
   renderPieces();
 }
 
 function onSlotClick(row, col) {
   if (!isPlaying) return;
 
-  // 点击已放置的碎片 → 回收回碎片区
   if (placed[row][col]) {
     placed[row][col] = null;
-    PuzzleAudio.error();
+    PuzzleAudio.remove();
     selectedId = -1;
     render();
     return;
   }
 
-  // 没有选中碎片，不操作
   if (selectedId === -1) return;
 
-  // 将选中碎片放入这个空格（任意空格都可以放）
   const p = pieces[selectedId];
   placed[row][col] = p;
   selectedId = -1;
   PuzzleAudio.place();
   render();
 
-  // 全部填满后检查是否完全正确
   if (isComplete()) {
-    const wrongSlots = [];
-    for (let r = 0; r < gridSize; r++) {
-      for (let c = 0; c < gridSize; c++) {
-        const pp = placed[r][c];
-        if (pp && (pp.row !== r || pp.col !== c)) wrongSlots.push({r,c});
-      }
-    }
-    if (wrongSlots.length === 0) {
-      onVictory();
-    } else {
-      // 位置不对 → 闪红提示所有错误位置，不清空，让用户自己点击修正
-      PuzzleAudio.error();
-      const slots = boardEl.querySelectorAll('.slot');
-      wrongSlots.forEach(({r, c}) => {
-        const idx = r * gridSize + c;
-        const slot = slots[idx];
-        if (slot) {
-          slot.style.background = 'rgba(255,60,60,0.35)';
-          setTimeout(() => { slot.style.background = ''; }, 500);
-        }
-      });
-    }
+    onVictory();
   }
 }
 
-// ------ 游戏流程 ------
+boardEl.addEventListener('click', (e) => {
+  if (!isPlaying) return;
+  const slot = e.target.closest('.slot');
+  if (!slot) return;
+  const row = parseInt(slot.dataset.row);
+  const col = parseInt(slot.dataset.col);
+  if (isNaN(row) || isNaN(col)) return;
+  onSlotClick(row, col);
+});
+
+piecesGrid.addEventListener('click', (e) => {
+  if (!isPlaying) return;
+  const piece = e.target.closest('.piece');
+  if (!piece) return;
+  const id = parseInt(piece.dataset.id);
+  if (isNaN(id)) return;
+  onPieceClick(id);
+});
 
 function loadImage(url) {
   return new Promise((resolve, reject) => {
@@ -828,7 +1480,7 @@ function loadImage(url) {
 async function startGame(size) {
   PuzzleAudio.init();
   startOverlay.style.display = 'none';
-  boardEl.innerHTML = '<div id="loading"><div class="spinner"></div><p>正在生成动物图片...</p></div>';
+  boardEl.innerHTML = '<div id="loading"><div class="spinner"></div><p>正在生成图片...</p></div>';
 
   gridSize = size;
   totalPieces = size * size;
@@ -840,20 +1492,6 @@ async function startGame(size) {
 
   overlay.classList.remove('show');
 
-  // 加载图片
-  const apiUrl = getAnimalImageUrl();
-  try {
-    await loadImage(apiUrl);
-    refImgUrl = apiUrl;
-  } catch {
-    // API 失败，用 Canvas 后备
-    const sizePx = Math.max(512, pieceSize * gridSize);
-    refImgUrl = generateFallbackImage(sizePx);
-    await loadImage(refImgUrl);
-  }
-  refImg.src = refImgUrl;
-
-  // 初始化数据
   placed = [];
   for (let r = 0; r < gridSize; r++) {
     placed[r] = [];
@@ -869,9 +1507,12 @@ async function startGame(size) {
     pieces.push({ id: i, row: r, col: c });
   }
 
-  // 打乱
   shuffledIds = pieces.map(p => p.id);
   shuffleIds();
+
+  const sizePx = Math.max(512, gridSize * 80);
+  refImgUrl = generateThemeImage(sizePx);
+  console.log('Canvas theme image generated for:', currentTheme);
 
   applyBoardStyle();
   render();
@@ -889,8 +1530,6 @@ async function startGame(size) {
 function restartGame() {
   startGame(gridSize);
 }
-
-// ------ 胜利 ------
 
 function onVictory() {
   isPlaying = false;
@@ -916,93 +1555,38 @@ function launchConfetti() {
     el.style.opacity = '1';
     document.body.appendChild(el);
 
-    const x = (Math.random() - 0.5) * 200;
-    const y = window.innerHeight * (0.4 + Math.random() * 0.6);
-    const duration = 1 + Math.random() * 2;
+    const angle = Math.random() * Math.PI;
+    const velocity = 150 + Math.random() * 200;
+    const vx = Math.cos(angle) * velocity;
+    const vy = Math.sin(angle) * velocity;
+    const duration = 1 + Math.random();
 
-    el.animate([
-      { transform: 'translateY(0) translateX(0) rotate(0deg)', opacity: 1 },
-      { transform: `translateY(${y}px) translateX(${x}px) rotate(${360 * (Math.random() > 0.5 ? 1 : -1)}deg)`, opacity: 0.7 }
-    ], {
-      duration: duration * 1000,
-      easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-      fill: 'forwards'
-    }).onfinish = () => el.remove();
+    el.style.transition = `top ${duration}s ease-in, left ${duration}s ease-out, opacity ${duration}s ease-out`;
+    setTimeout(() => {
+      el.style.top = '110vh';
+      el.style.left = (parseFloat(el.style.left) + vx) + 'px';
+      el.style.opacity = '0';
+    }, 10);
+    setTimeout(() => el.remove(), duration * 1000);
   }
 }
 
-// ------ 全屏 ------
+document.getElementById('shuffleBtn').addEventListener('click', () => {
+  if (!isPlaying) return;
+  for (let r = 0; r < gridSize; r++)
+    for (let c = 0; c < gridSize; c++)
+      placed[r][c] = null;
+  shuffleIds();
+  selectedId = -1;
+  render();
+});
 
-function toggleFullscreen() {
-  const el = document.documentElement;
-  if (document.fullscreenElement || document.webkitFullscreenElement) {
-    if (document.exitFullscreen) document.exitFullscreen();
-    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+document.getElementById('fullscreenBtn').addEventListener('click', () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(e => {});
   } else {
-    const r = el.requestFullscreen || el.webkitRequestFullscreen;
-    if (r) r.call(el);
+    document.exitFullscreen();
   }
-}
-
-// ------ 参考图点击放大 ------
-
-refImg.addEventListener('click', () => {
-  refImg.classList.toggle('enlarged');
-  if (refImg.classList.contains('enlarged')) {
-    document.addEventListener('click', closeEnlarged);
-  }
-});
-
-function closeEnlarged(e) {
-  if (e.target !== refImg) {
-    refImg.classList.remove('enlarged');
-    document.removeEventListener('click', closeEnlarged);
-  }
-}
-
-// ------ 事件绑定（事件委托）------
-
-// 拼图框点击：事件委托在 boardEl 上
-boardEl.addEventListener('click', (e) => {
-  if (!isPlaying) return;
-  const slot = e.target.closest('.slot');
-  if (!slot) return;
-  const row = parseInt(slot.dataset.row);
-  const col = parseInt(slot.dataset.col);
-  if (isNaN(row) || isNaN(col)) return;
-  onSlotClick(row, col);
-});
-
-// 碎片区点击：事件委托在 piecesGrid 上
-piecesGrid.addEventListener('click', (e) => {
-  if (!isPlaying) return;
-  const piece = e.target.closest('.piece');
-  if (!piece) return;
-  const id = parseInt(piece.dataset.id);
-  if (isNaN(id)) return;
-  onPieceClick(id);
-});
-
-document.getElementById('fullscreenBtn').addEventListener('click', (e) => {
-  e.stopPropagation();
-  toggleFullscreen();
-});
-
-document.getElementById('shuffleBtn').addEventListener('click', (e) => {
-  e.stopPropagation();
-  if (isStarted) restartGame();
-});
-
-// 窗口适配（延迟执行，防止抖动）
-let resizeTimer = null;
-window.addEventListener('resize', () => {
-  if (resizeTimer) clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(() => {
-    if (isStarted) {
-      applyBoardStyle();
-      render();
-    }
-  }, 200);
 });
 </script>
 </body>

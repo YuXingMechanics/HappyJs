@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>世界地理探险 - 快乐学习乐园</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #fd79a8, #e84393);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        #gameContainer {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        #gameTitle {
+            text-align: center;
+            font-size: 28px;
+            font-weight: 800;
+            color: #e84393;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        #topBar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: linear-gradient(135deg, #fd79a8, #e84393);
+            border-radius: 16px;
+            color: white;
+        }
+
+        #topBarLeft {
+            display: flex;
+            gap: 10px;
+        }
+
+        #topBarLeft button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        #topBarLeft button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        #stats {
+            display: flex;
+            gap: 20px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        #startOverlay {
+            text-align: center;
+            padding: 20px;
+        }
+
+        #startOverlay h2 {
+            color: #e84393;
+            font-size: 24px;
+            margin-bottom: 25px;
+        }
+
+        #modeSelect {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        #modeSelect button {
+            padding: 15px 20px;
+            border: none;
+            border-radius: 14px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        #modeSelect button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .mode-flag {
+            background: linear-gradient(135deg, #0abde3, #48dbfb);
+            color: white;
+        }
+
+        .mode-capital {
+            background: linear-gradient(135deg, #1dd1a1, #10ac84);
+            color: white;
+        }
+
+        .mode-mixed {
+            background: linear-gradient(135deg, #ff9ff3, #f368e0);
+            color: white;
+        }
+
+        #questionArea {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            border-radius: 20px;
+            margin-bottom: 25px;
+        }
+
+        #questionNumber {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        #questionText {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2d3436;
+            margin-bottom: 20px;
+        }
+
+        #flagDisplay {
+            font-size: 80px;
+            margin: 20px 0;
+        }
+
+        #answerArea {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .answer-btn {
+            padding: 20px;
+            border: none;
+            border-radius: 16px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: linear-gradient(135deg, #fd79a8, #e84393);
+            color: white;
+        }
+
+        .answer-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(232, 67, 147, 0.4);
+        }
+
+        .answer-btn:active {
+            transform: translateY(0);
+        }
+
+        .answer-btn.correct {
+            background: linear-gradient(135deg, #1dd1a1, #10ac84);
+        }
+
+        .answer-btn.wrong {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+        }
+
+        #feedback {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: 700;
+            min-height: 30px;
+        }
+
+        #feedback.correct {
+            color: #1dd1a1;
+        }
+
+        #feedback.wrong {
+            color: #ff6b6b;
+        }
+
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 1000;
+        }
+
+        #overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #overlayContent {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        #overlayContent h2 {
+            color: #e84393;
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        #finalStats {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.8;
+        }
+
+        #overlayContent button {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 14px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            background: linear-gradient(135deg, #fd79a8, #e84393);
+            color: white;
+            transition: all 0.3s;
+        }
+
+        #overlayContent button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(232, 67, 147, 0.4);
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #fd79a8;
+            animation: fall linear infinite;
+            z-index: 9999;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+        }
+
+        @media (max-width: 480px) {
+            #gameContainer {
+                padding: 20px;
+            }
+
+            #flagDisplay {
+                font-size: 60px;
+            }
+
+            #questionText {
+                font-size: 20px;
+            }
+
+            .answer-btn {
+                padding: 15px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="gameTitle">🌍 世界地理探险</div>
+
+        <div id="topBar">
+            <div id="topBarLeft">
+                <button onclick="location.href='../../'">🏠</button>
+                <button onclick="restartGame()">🔄 重新开始</button>
+            </div>
+            <div id="stats">
+                <span>📝 <span id="currentQ">1</span> / <span id="totalQ">10</span></span>
+                <span>✅ <span id="score">0</span></span>
+                <span>⏱️ <span id="timer">0</span>s</span>
+            </div>
+        </div>
+
+        <div id="startOverlay">
+            <h2>选择挑战模式！</h2>
+            <div id="modeSelect">
+                <button class="mode-flag" onclick="startGame('flag')">
+                    🎌 国旗猜猜看
+                </button>
+                <button class="mode-capital" onclick="startGame('capital')">
+                    🏛️ 首都大挑战
+                </button>
+                <button class="mode-mixed" onclick="startGame('mixed')">
+                    🎯 混合挑战
+                </button>
+            </div>
+        </div>
+
+        <div id="quizArea" style="display: none;">
+            <div id="questionArea">
+                <div id="questionNumber">第 1 题</div>
+                <div id="flagDisplay"></div>
+                <div id="questionText">这个国旗属于哪个国家？</div>
+            </div>
+            <div id="answerArea">
+                <button class="answer-btn" onclick="checkAnswer(0)">选项 A</button>
+                <button class="answer-btn" onclick="checkAnswer(1)">选项 B</button>
+                <button class="answer-btn" onclick="checkAnswer(2)">选项 C</button>
+                <button class="answer-btn" onclick="checkAnswer(3)">选项 D</button>
+            </div>
+            <div id="feedback"></div>
+        </div>
+    </div>
+
+    <div id="overlay">
+        <div id="overlayContent">
+            <h2>🎉 挑战完成！</h2>
+            <div id="finalStats">
+                模式：<span id="finalMode"></span><br>
+                得分：<span id="finalScore">0</span> / 10<br>
+                用时：<span id="finalTime">0</span> 秒<br>
+                正确率：<span id="finalPercent">0%</span>
+            </div>
+            <button onclick="restartGame()">🔄 再玩一次</button>
+        </div>
+    </div>
+
+    <script>
+        const countries = [
+            { code: 'CN', name: '中国', capital: '北京', emoji: '🇨🇳' },
+            { code: 'US', name: '美国', capital: '华盛顿', emoji: '🇺🇸' },
+            { code: 'JP', name: '日本', capital: '东京', emoji: '🇯🇵' },
+            { code: 'KR', name: '韩国', capital: '首尔', emoji: '🇰🇷' },
+            { code: 'GB', name: '英国', capital: '伦敦', emoji: '🇬🇧' },
+            { code: 'FR', name: '法国', capital: '巴黎', emoji: '🇫🇷' },
+            { code: 'DE', name: '德国', capital: '柏林', emoji: '🇩🇪' },
+            { code: 'IT', name: '意大利', capital: '罗马', emoji: '🇮🇹' },
+            { code: 'BR', name: '巴西', capital: '巴西利亚', emoji: '🇧🇷' },
+            { code: 'CA', name: '加拿大', capital: '渥太华', emoji: '🇨🇦' },
+            { code: 'AU', name: '澳大利亚', capital: '堪培拉', emoji: '🇦🇺' },
+            { code: 'RU', name: '俄罗斯', capital: '莫斯科', emoji: '🇷🇺' },
+            { code: 'IN', name: '印度', capital: '新德里', emoji: '🇮🇳' },
+            { code: 'TH', name: '泰国', capital: '曼谷', emoji: '🇹🇭' },
+            { code: 'MX', name: '墨西哥', capital: '墨西哥城', emoji: '🇲🇽' },
+            { code: 'ES', name: '西班牙', capital: '马德里', emoji: '🇪🇸' },
+            { code: 'PT', name: '葡萄牙', capital: '里斯本', emoji: '🇵🇹' },
+            { code: 'NL', name: '荷兰', capital: '阿姆斯特丹', emoji: '🇳🇱' },
+            { code: 'DK', name: '丹麦', capital: '哥本哈根', emoji: '🇩🇰' },
+            { code: 'SE', name: '瑞典', capital: '斯德哥尔摩', emoji: '🇸🇪' },
+            { code: 'NO', name: '挪威', capital: '奥斯陆', emoji: '🇳🇴' },
+            { code: 'FI', name: '芬兰', capital: '赫尔辛基', emoji: '🇫🇮' },
+            { code: 'PL', name: '波兰', capital: '华沙', emoji: '🇵🇱' },
+            { code: 'GR', name: '希腊', capital: '雅典', emoji: '🇬🇷' },
+            { code: 'EG', name: '埃及', capital: '开罗', emoji: '🇪🇬' },
+            { code: 'SA', name: '沙特阿拉伯', capital: '利雅得', emoji: '🇸🇦' },
+            { code: 'AE', name: '阿联酋', capital: '阿布扎比', emoji: '🇦🇪' },
+            { code: 'SG', name: '新加坡', capital: '新加坡', emoji: '🇸🇬' },
+            { code: 'MY', name: '马来西亚', capital: '吉隆坡', emoji: '🇲🇾' },
+            { code: 'ID', name: '印度尼西亚', capital: '雅加达', emoji: '🇮🇩' }
+        ];
+
+        const startOverlay = document.getElementById('startOverlay');
+        const quizArea = document.getElementById('quizArea');
+        const questionText = document.getElementById('questionText');
+        const questionNumber = document.getElementById('questionNumber');
+        const flagDisplay = document.getElementById('flagDisplay');
+        const answerButtons = document.querySelectorAll('.answer-btn');
+        const feedback = document.getElementById('feedback');
+        const currentQEl = document.getElementById('currentQ');
+        const totalQEl = document.getElementById('totalQ');
+        const scoreEl = document.getElementById('score');
+        const timerEl = document.getElementById('timer');
+        const overlay = document.getElementById('overlay');
+        const finalMode = document.getElementById('finalMode');
+        const finalScore = document.getElementById('finalScore');
+        const finalTime = document.getElementById('finalTime');
+        const finalPercent = document.getElementById('finalPercent');
+
+        let currentQuestion = 0;
+        let score = 0;
+        let timer = 0;
+        let timerInterval = null;
+        let gameMode = 'flag';
+        let currentAnswer = '';
+        let isPlaying = false;
+
+        const GeoAudio = (() => {
+            let ctx = null;
+            function init() {
+                if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+                if (ctx.state === 'suspended') ctx.resume();
+            }
+            function playTone(freq, type, duration) {
+                init();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + duration);
+            }
+            return {
+                init() { init(); },
+                correct() {
+                    playTone(600, 'sine', 0.1);
+                    setTimeout(() => playTone(800, 'sine', 0.1), 100);
+                    setTimeout(() => playTone(1000, 'sine', 0.2), 200);
+                },
+                wrong() {
+                    playTone(300, 'sawtooth', 0.3);
+                    setTimeout(() => playTone(250, 'sawtooth', 0.3), 150);
+                },
+                victory() {
+                    const notes = [523, 659, 784, 1047];
+                    notes.forEach((n, i) => {
+                        setTimeout(() => playTone(n, 'sine', 0.3), i * 150);
+                    });
+                }
+            };
+        })();
+
+        function getRandomCountries(count) {
+            const shuffled = [...countries].sort(() => Math.random() - 0.5);
+            return shuffled.slice(0, count);
+        }
+
+        function generateQuestion() {
+            const selected = getRandomCountries(4);
+            const correctIndex = Math.floor(Math.random() * 4);
+            const correctCountry = selected[correctIndex];
+
+            let type = gameMode;
+            if (gameMode === 'mixed') {
+                type = Math.random() > 0.5 ? 'flag' : 'capital';
+            }
+
+            let text, answer, options;
+
+            if (type === 'flag') {
+                text = '这个国旗属于哪个国家？';
+                answer = correctCountry.name;
+                options = selected.map(c => c.name);
+            } else {
+                text = `${correctCountry.name} 的首都是？`;
+                answer = correctCountry.capital;
+                options = selected.map(c => c.capital);
+            }
+
+            options.sort(() => Math.random() - 0.5);
+
+            return {
+                text: text,
+                emoji: correctCountry.emoji,
+                answer: answer,
+                options: options,
+                countryName: correctCountry.name,
+                capital: correctCountry.capital
+            };
+        }
+
+        function displayQuestion() {
+            const q = generateQuestion();
+            questionText.textContent = q.text;
+            flagDisplay.textContent = q.emoji;
+            currentAnswer = q.answer;
+            questionNumber.textContent = `第 ${currentQuestion + 1} 题`;
+            currentQEl.textContent = currentQuestion + 1;
+
+            answerButtons.forEach((btn, i) => {
+                btn.textContent = q.options[i];
+                btn.classList.remove('correct', 'wrong');
+                btn.disabled = false;
+            });
+
+            feedback.textContent = '';
+            feedback.classList.remove('correct', 'wrong');
+        }
+
+        function checkAnswer(index) {
+            if (!isPlaying) return;
+            
+            const selectedAnswer = answerButtons[index].textContent;
+            
+            answerButtons.forEach(btn => btn.disabled = true);
+
+            if (selectedAnswer === currentAnswer) {
+                answerButtons[index].classList.add('correct');
+                feedback.textContent = '✅ 回答正确！太棒了！';
+                feedback.classList.add('correct');
+                score++;
+                scoreEl.textContent = score;
+                GeoAudio.correct();
+            } else {
+                answerButtons[index].classList.add('wrong');
+                feedback.textContent = `❌ 回答错误！正确答案是 ${currentAnswer}`;
+                feedback.classList.add('wrong');
+                GeoAudio.wrong();
+                
+                answerButtons.forEach(btn => {
+                    if (btn.textContent === currentAnswer) {
+                        btn.classList.add('correct');
+                    }
+                });
+            }
+
+            currentQuestion++;
+
+            setTimeout(() => {
+                if (currentQuestion >= 10) {
+                    onVictory();
+                } else {
+                    displayQuestion();
+                }
+            }, 1500);
+        }
+
+        function startGame(mode) {
+            GeoAudio.init();
+            gameMode = mode;
+            currentQuestion = 0;
+            score = 0;
+            timer = 0;
+            isPlaying = true;
+
+            startOverlay.style.display = 'none';
+            quizArea.style.display = 'block';
+            
+            scoreEl.textContent = '0';
+            timerEl.textContent = '0';
+            
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timer++;
+                timerEl.textContent = timer;
+            }, 1000);
+
+            displayQuestion();
+        }
+
+        function restartGame() {
+            if (timerInterval) clearInterval(timerInterval);
+            overlay.classList.remove('show');
+            startOverlay.style.display = 'block';
+            quizArea.style.display = 'none';
+            currentQuestion = 0;
+            score = 0;
+            timer = 0;
+            isPlaying = false;
+        }
+
+        function onVictory() {
+            isPlaying = false;
+            if (timerInterval) clearInterval(timerInterval);
+            GeoAudio.victory();
+
+            const modeNames = {
+                flag: '国旗猜猜看',
+                capital: '首都大挑战',
+                mixed: '混合挑战'
+            };
+
+            finalMode.textContent = modeNames[gameMode];
+            finalScore.textContent = `${score} / 10`;
+            finalTime.textContent = timer;
+            finalPercent.textContent = `${Math.round((score / 10) * 100)}%`;
+
+            overlay.classList.add('show');
+            launchConfetti();
+        }
+
+        function launchConfetti() {
+            const colors = ['#FF6B6B', '#FFD700', '#48DBFB', '#FF9FF3', '#54a0ff', '#00d2d3', '#f8a5c2', '#FFA500', '#38ef7d'];
+            for (let i = 0; i < 80; i++) {
+                const el = document.createElement('div');
+                el.className = 'confetti';
+                const size = 4 + Math.random() * 6;
+                el.style.width = size + 'px';
+                el.style.height = size + 'px';
+                el.style.background = colors[Math.floor(Math.random() * colors.length)];
+                el.style.left = Math.random() * 100 + '%';
+                el.style.animationDuration = (3 + Math.random() * 3) + 's';
+                el.style.animationDelay = Math.random() * 2 + 's';
+                document.body.appendChild(el);
+            }
+            setTimeout(() => {
+                document.querySelectorAll('.confetti').forEach(el => el.remove());
+            }, 6000);
+        }
+    </script>
+</body>
+</html>

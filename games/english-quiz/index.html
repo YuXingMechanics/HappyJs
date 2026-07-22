@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英语小测验 - 快乐学习乐园</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        #gameContainer {
+            background: rgba(255,255,255,0.95);
+            border-radius: 24px;
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        #gameTitle {
+            text-align: center;
+            font-size: 28px;
+            font-weight: 800;
+            color: #f5576c;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        #topBar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            border-radius: 16px;
+            color: white;
+        }
+        #topBarLeft { display: flex; gap: 10px; }
+        #topBarLeft button {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        #topBarLeft button:hover { background: rgba(255,255,255,0.3); transform: translateY(-2px); }
+        #stats {
+            display: flex;
+            gap: 20px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        #startOverlay { text-align: center; padding: 10px 0; }
+
+        /* ===== 模式标签 ===== */
+        .mode-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+        .mode-tab {
+            flex: 1;
+            padding: 12px 8px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            background: #f5f7fa;
+            color: #666;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .mode-tab:hover { border-color: #f093fb; color: #f5576c; }
+        .mode-tab.active {
+            border-color: #f5576c;
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+        }
+
+        /* ===== 模式面板 ===== */
+        .mode-panel { padding: 5px 0; }
+        .mode-panel h2 {
+            color: #f5576c;
+            font-size: 20px;
+            margin-bottom: 16px;
+        }
+
+        /* ===== 设置行 ===== */
+        .setting-row {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+            text-align: left;
+        }
+        .setting-row > span {
+            font-size: 15px;
+            font-weight: 700;
+            color: #555;
+        }
+
+        /* ===== 预设按钮组 ===== */
+        .preset-btns {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .preset-btn {
+            padding: 10px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: white;
+            color: #555;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .preset-btn:hover { border-color: #f093fb; color: #f5576c; }
+        .preset-btn.active {
+            border-color: #f5576c;
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+        }
+
+        /* ===== 自定义输入框 ===== */
+        .challenge-input {
+            width: 80px;
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .challenge-input:focus { border-color: #f5576c; }
+
+        /* ===== 开始按钮 ===== */
+        .start-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            color: white;
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            transition: all 0.3s;
+            margin-top: 8px;
+        }
+        .start-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(245,87,108,0.4); }
+
+        /* ===== 分类选择（纵向） ===== */
+        .cat-select {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .cat-btn {
+            padding: 16px 20px;
+            border: none;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .cat-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+        .cat-btn:active { transform: translateY(0); }
+        .cat-1 { background: linear-gradient(135deg, #f093fb, #f5576c); }
+        .cat-2 { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+        .cat-3 { background: linear-gradient(135deg, #43e97b, #38f9d7); color: #333; }
+        .cat-4 { background: linear-gradient(135deg, #fa709a, #fee140); color: #333; }
+        .cat-5 { background: linear-gradient(135deg, #0abde3, #48dbfb); }
+        .cat-6 { background: linear-gradient(135deg, #ff9ff3, #f368e0); }
+        .cat-7 { background: linear-gradient(135deg, #00b894, #00cec9); }
+
+        /* ===== TF判断模式（只显示2个按钮） ===== */
+        #answerArea.tf-mode {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        #answerArea.tf-mode .answer-btn {
+            font-size: 28px;
+            padding: 25px 20px;
+        }
+        #answerArea.tf-mode .answer-btn:nth-child(3),
+        #answerArea.tf-mode .answer-btn:nth-child(4) {
+            display: none;
+        }
+
+        /* ===== 横向分类按钮（挑战/计时赛用） ===== */
+        .cat-select-horiz {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .cat-select-horiz .preset-btn {
+            flex: 1;
+            min-width: 100px;
+            padding: 12px 10px;
+            text-align: center;
+        }
+
+        /* ===== 计时器显示 ===== */
+        .timer-display {
+            font-size: 14px;
+            font-weight: 700;
+            color: #f5576c;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        /* ===== 说明文字 ===== */
+        .mode-desc {
+            font-size: 15px;
+            color: #888;
+            text-align: center;
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        /* ===== 难度标签颜色 ===== */
+        .diff-tag {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .diff-tag-1 { background: #dfe6e9; color: #636e72; }
+        .diff-tag-2 { background: #ffeaa7; color: #d68910; }
+        .diff-tag-3 { background: #fab1a0; color: #c0392b; }
+
+        /* ===== 游戏区域 ===== */
+        #quizArea { display: none; }
+        #catInfo {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+            padding: 8px;
+            background: #f5f7fa;
+            border-radius: 10px;
+        }
+        #questionArea {
+            text-align: center;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            border-radius: 20px;
+            margin-bottom: 25px;
+            min-height: 120px;
+        }
+        #questionNumber { font-size: 14px; color: #666; margin-bottom: 10px; }
+        #questionLabel {
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 6px;
+        }
+        #questionText {
+            font-size: 32px;
+            font-weight: 800;
+            color: #2d3436;
+            margin-bottom: 8px;
+            word-break: break-word;
+        }
+        #questionHint {
+            font-size: 14px;
+            color: #636e72;
+            margin-top: 6px;
+        }
+        #answerArea {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        .answer-btn {
+            padding: 18px 10px;
+            border: none;
+            border-radius: 16px;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+            word-break: break-word;
+        }
+        .answer-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(245,87,108,0.3); }
+        .answer-btn:active { transform: translateY(0); }
+        .answer-btn.correct { background: linear-gradient(135deg, #1dd1a1, #10ac84); }
+        .answer-btn.wrong { background: linear-gradient(135deg, #ff6b6b, #ee5a24); }
+        #feedback {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: 700;
+            min-height: 30px;
+        }
+        #feedback.correct { color: #1dd1a1; }
+        #feedback.wrong { color: #ff6b6b; }
+
+        /* ===== 结果弹窗 ===== */
+        #overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 1000;
+        }
+        #overlay.show { opacity: 1; pointer-events: auto; }
+        #overlayContent {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        #overlayContent h2 { color: #f5576c; font-size: 32px; margin-bottom: 20px; }
+        #finalStats { font-size: 18px; color: #666; margin-bottom: 30px; line-height: 1.8; }
+        #overlayContent button {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 14px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+            transition: all 0.3s;
+        }
+        #overlayContent button:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(245,87,108,0.4); }
+
+        .confetti {
+            position: fixed;
+            width: 10px; height: 10px;
+            animation: fall linear infinite;
+            z-index: 9999;
+        }
+        @keyframes fall {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+        }
+
+        @media (max-width: 480px) {
+            #gameContainer { padding: 20px; }
+            #questionText { font-size: 26px; }
+            .answer-btn { padding: 14px 8px; font-size: 17px; }
+            .cat-btn { padding: 13px 16px; font-size: 15px; }
+            .mode-tab { font-size: 13px; padding: 10px 6px; }
+            .preset-btn { font-size: 12px; padding: 8px 10px; }
+            .cat-select-horiz .preset-btn { min-width: 70px; font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="gameTitle">📖 英语小测验</div>
+
+        <div id="topBar">
+            <div id="topBarLeft">
+                <button onclick="location.href='../../'">🏠</button>
+                <button onclick="restartGame()">🔄 重新开始</button>
+            </div>
+            <div id="stats">
+                <span>📝 <span id="currentQ">1</span> / <span id="totalQ">10</span></span>
+                <span>✅ <span id="score">0</span></span>
+                <span>⏱️ <span id="timer">0</span>s</span>
+            </div>
+        </div>
+
+        <div id="startOverlay">
+            <!-- 模式标签 -->
+            <div class="mode-tabs">
+                <button class="mode-tab active" data-mode="study" onclick="switchMode('study')">📖 学习模式</button>
+                <button class="mode-tab" data-mode="challenge" onclick="switchMode('challenge')">🏆 挑战赛</button>
+                <button class="mode-tab" data-mode="timer" onclick="switchMode('timer')">⏱️ 计时赛</button>
+            </div>
+
+            <!-- 学习模式面板 -->
+            <div class="mode-panel" id="panel-study">
+                <h2>📚 选择分类与难度</h2>
+                <div class="cat-select">
+                    <button class="cat-btn cat-1" onclick="startStudy('spell')">🔤 单词拼写</button>
+                    <button class="cat-btn cat-2" onclick="startStudy('translate')">🌏 英译中</button>
+                    <button class="cat-btn cat-3" onclick="startStudy('emoji')">🎨 看图识词</button>
+                    <button class="cat-btn cat-4" onclick="startStudy('sentence')">📜 读句子</button>
+                    <button class="cat-btn cat-5" onclick="startStudy('response')">💬 应答句</button>
+                    <button class="cat-btn cat-6" onclick="startStudy('reading')">📖 阅读理解</button>
+                    <button class="cat-btn cat-7" onclick="startStudy('tfreading')">✅ TF判断</button>
+                </div>
+                <div class="setting-row">
+                    <span>难度：</span>
+                    <div class="preset-btns">
+                        <button class="preset-btn active" data-diff="1" onclick="selectStudyDiff(1, this)">🍭 简单</button>
+                        <button class="preset-btn" data-diff="2" onclick="selectStudyDiff(2, this)">🍫 普通</button>
+                        <button class="preset-btn" data-diff="3" onclick="selectStudyDiff(3, this)">🔥 困难</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 挑战赛面板 -->
+            <div class="mode-panel" id="panel-challenge" style="display:none">
+                <h2>🏆 挑战赛设置</h2>
+                <div class="setting-row">
+                    <span>分类：</span>
+                    <div class="cat-select-horiz preset-btns">
+                        <button class="preset-btn active" data-cat="spell" onclick="selectChallengeCat('spell', this)">🔤 单词拼写</button>
+                        <button class="preset-btn" data-cat="translate" onclick="selectChallengeCat('translate', this)">🌏 英译中</button>
+                        <button class="preset-btn" data-cat="emoji" onclick="selectChallengeCat('emoji', this)">🎨 看图识词</button>
+                        <button class="preset-btn" data-cat="sentence" onclick="selectChallengeCat('sentence', this)">📜 读句子</button>
+                        <button class="preset-btn" data-cat="response" onclick="selectChallengeCat('response', this)">💬 应答句</button>
+                        <button class="preset-btn" data-cat="reading" onclick="selectChallengeCat('reading', this)">📖 阅读理解</button>
+                        <button class="preset-btn" data-cat="tfreading" onclick="selectChallengeCat('tfreading', this)">✅ TF判断</button>
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <span>难度：</span>
+                    <div class="preset-btns">
+                        <button class="preset-btn active" data-diff="1" onclick="selectChallengeDiff(1, this)">🍭 简单</button>
+                        <button class="preset-btn" data-diff="2" onclick="selectChallengeDiff(2, this)">🍫 普通</button>
+                        <button class="preset-btn" data-diff="3" onclick="selectChallengeDiff(3, this)">🔥 困难</button>
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <span>题目数量：</span>
+                    <div class="preset-btns">
+                        <button class="preset-btn" data-count="5" onclick="selectChallengeCount(5, this)">5</button>
+                        <button class="preset-btn active" data-count="10" onclick="selectChallengeCount(10, this)">10</button>
+                        <button class="preset-btn" data-count="15" onclick="selectChallengeCount(15, this)">15</button>
+                        <button class="preset-btn" data-count="20" onclick="selectChallengeCount(20, this)">20</button>
+                        <input class="challenge-input" type="number" min="1" max="50" placeholder="自定义" oninput="onChallengeCountInput(this)">
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <span>时间限制（秒）：</span>
+                    <div class="preset-btns">
+                        <button class="preset-btn" data-time="30" onclick="selectChallengeTime(30, this)">30</button>
+                        <button class="preset-btn active" data-time="60" onclick="selectChallengeTime(60, this)">60</button>
+                        <button class="preset-btn" data-time="90" onclick="selectChallengeTime(90, this)">90</button>
+                        <button class="preset-btn" data-time="120" onclick="selectChallengeTime(120, this)">120</button>
+                        <input class="challenge-input" type="number" min="10" max="600" placeholder="自定义" oninput="onChallengeTimeInput(this)">
+                    </div>
+                </div>
+                <button class="start-btn" onclick="startChallenge()">🚀 开始挑战</button>
+            </div>
+
+            <!-- 计时赛面板 -->
+            <div class="mode-panel" id="panel-timer" style="display:none">
+                <h2>⏱️ 计时赛设置</h2>
+                <div class="setting-row">
+                    <span>分类：</span>
+                    <div class="cat-select-horiz preset-btns">
+                        <button class="preset-btn active" data-cat="spell" onclick="selectTimerCat('spell', this)">🔤 单词拼写</button>
+                        <button class="preset-btn" data-cat="translate" onclick="selectTimerCat('translate', this)">🌏 英译中</button>
+                        <button class="preset-btn" data-cat="emoji" onclick="selectTimerCat('emoji', this)">🎨 看图识词</button>
+                        <button class="preset-btn" data-cat="sentence" onclick="selectTimerCat('sentence', this)">📜 读句子</button>
+                        <button class="preset-btn" data-cat="response" onclick="selectTimerCat('response', this)">💬 应答句</button>
+                        <button class="preset-btn" data-cat="reading" onclick="selectTimerCat('reading', this)">📖 阅读理解</button>
+                        <button class="preset-btn" data-cat="tfreading" onclick="selectTimerCat('tfreading', this)">✅ TF判断</button>
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <span>难度：</span>
+                    <div class="preset-btns">
+                        <button class="preset-btn active" data-diff="1" onclick="selectTimerDiff(1, this)">🍭 简单</button>
+                        <button class="preset-btn" data-diff="2" onclick="selectTimerDiff(2, this)">🍫 普通</button>
+                        <button class="preset-btn" data-diff="3" onclick="selectTimerDiff(3, this)">🔥 困难</button>
+                    </div>
+                </div>
+                <p class="mode-desc">⚡ 尽可能快地答题！答完所有题目即结束，用时越短越好！</p>
+                <button class="start-btn" onclick="startTimerRace()">⏱️ 开始计时赛</button>
+            </div>
+        </div>
+
+        <div id="quizArea">
+            <div id="catInfo"></div>
+            <div id="timerDisplay" class="timer-display" style="display:none"></div>
+            <div id="questionArea">
+                <div id="questionNumber">第 1 题</div>
+                <div id="questionLabel"></div>
+                <div id="questionText"></div>
+                <div id="questionHint"></div>
+            </div>
+            <div id="answerArea">
+                <button class="answer-btn" onclick="checkAnswer(0)">A</button>
+                <button class="answer-btn" onclick="checkAnswer(1)">B</button>
+                <button class="answer-btn" onclick="checkAnswer(2)">C</button>
+                <button class="answer-btn" onclick="checkAnswer(3)">D</button>
+            </div>
+            <div id="feedback"></div>
+        </div>
+    </div>
+
+    <div id="overlay">
+        <div id="overlayContent">
+            <h2 id="resultTitle">🎉 挑战完成！</h2>
+            <div id="finalStats">
+                分类：<span id="finalCat"></span><br>
+                得分：<span id="finalScore">0</span> / <span id="finalTotal">10</span><br>
+                用时：<span id="finalTime">0</span> 秒<br>
+                正确率：<span id="finalPercent">0%</span>
+            </div>
+            <button onclick="restartGame()">🔄 再来一次</button>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        //  数据
+        // ============================================================
+        const questionBank = {
+            // -------- 单词拼写 --------
+            spell: [
+                { q: '苹果', hint: '🍎 一种水果', opts: ['apple', 'aple', 'appel', 'aplle'], ans: 0, diff: 1 },
+                { q: '小猫', hint: '🐱 宠物', opts: ['ket', 'cat', 'kat', 'cet'], ans: 1, diff: 1 },
+                { q: '小狗', hint: '🐕 人类最好的朋友', opts: ['dawg', 'doj', 'dog', 'dok'], ans: 2, diff: 1 },
+                { q: '书', hint: '📖 用来阅读', opts: ['buk', 'bok', 'book', 'boke'], ans: 2, diff: 1 },
+                { q: '汽车', hint: '🚗 交通工具', opts: ['car', 'kar', 'carr', 'karr'], ans: 0, diff: 1 },
+                { q: '鱼', hint: '🐟 在水里游', opts: ['fesh', 'fish', 'fsh', 'fisch'], ans: 1, diff: 1 },
+                { q: '鸟', hint: '🐦 在天上飞', opts: ['berd', 'burd', 'bird', 'berd'], ans: 2, diff: 1 },
+                { q: '太阳', hint: '☀️ 天上的恒星', opts: ['son', 'sun', 'sunn', 'san'], ans: 1, diff: 1 },
+                { q: '月亮', hint: '🌙 晚上的天空', opts: ['mun', 'mon', 'moon', 'moone'], ans: 2, diff: 1 },
+                { q: '花', hint: '🌸 植物的一部分', opts: ['flor', 'flawer', 'flower', 'floure'], ans: 2, diff: 2 },
+                { q: '树', hint: '🌳 高大的植物', opts: ['tre', 'tree', 'trea', 'trey'], ans: 1, diff: 2 },
+                { q: '水', hint: '💧 透明的液体', opts: ['wter', 'water', 'watar', 'watter'], ans: 1, diff: 2 },
+                { q: '学校', hint: '🏫 学习的地方', opts: ['skool', 'scholl', 'school', 'scool'], ans: 2, diff: 2 },
+                { q: '铅笔', hint: '✏️ 写字用的', opts: ['pencil', 'pensil', 'pencel', 'pensle'], ans: 0, diff: 2 },
+                { q: '椅子', hint: '🪑 用来坐', opts: ['chare', 'chear', 'cheir', 'chair'], ans: 3, diff: 2 },
+                { q: '桌子', hint: '🪵 放东西的家具', opts: ['tabl', 'teble', 'table', 'tabel'], ans: 2, diff: 2 },
+                { q: '红色', hint: '🔴 颜色', opts: ['rad', 'read', 'red', 'rid'], ans: 2, diff: 2 },
+                { q: '蓝色', hint: '🔵 天空的颜色', opts: ['bloo', 'blu', 'blew', 'blue'], ans: 3, diff: 3 },
+                { q: '大', hint: '📏 尺寸很大', opts: ['bik', 'big', 'beg', 'byg'], ans: 1, diff: 3 },
+                { q: '小', hint: '📐 尺寸很小', opts: ['smol', 'smal', 'small', 'smile'], ans: 2, diff: 3 },
+                { q: '开心', hint: '😊 心情好', opts: ['hapy', 'happy', 'happi', 'heppy'], ans: 1, diff: 3 },
+                { q: '老师', hint: '👩‍🏫 教你知识的人', opts: ['techer', 'tichar', 'ticher', 'teacher'], ans: 3, diff: 3 },
+                { q: '朋友', hint: '🤝 和你一起玩的人', opts: ['freind', 'frind', 'friend', 'frend'], ans: 2, diff: 3 },
+                { q: '厨房', hint: '🍳 做饭的地方', opts: ['kitchen', 'kitchan', 'kichen', 'kitchin'], ans: 0, diff: 3 },
+                { q: '香蕉', hint: '🍌 黄色的水果', opts: ['bananna', 'banan', 'banana', 'bannana'], ans: 2, diff: 3 },
+                // --- 新增题目 ---
+                { q: '牛奶', hint: '🥛 白色饮品', opts: ['milk', 'melk', 'mulk', 'malk'], ans: 0, diff: 1 },
+                { q: '鸡蛋', hint: '🥚 圆圆的食物', opts: ['eg', 'egg', 'egge', 'ekk'], ans: 1, diff: 1 },
+                { q: '男孩', hint: '👦 男生', opts: ['boi', 'boy', 'boey', 'bey'], ans: 1, diff: 1 },
+                { q: '女孩', hint: '👧 女生', opts: ['gerl', 'gril', 'girl', 'gurl'], ans: 2, diff: 1 },
+                { q: '好的', hint: '👍 表示赞同', opts: ['god', 'gud', 'goed', 'good'], ans: 3, diff: 1 },
+                { q: '家庭', hint: '👨‍👩‍👧‍👦 和家人在一起', opts: ['famly', 'famel', 'family', 'fammly'], ans: 2, diff: 2 },
+                { q: '生日', hint: '🎂 一年一次', opts: ['birthday', 'berthday', 'birthdey', 'birdday'], ans: 0, diff: 2 },
+                { q: '颜色', hint: '🎨 红橙黄绿', opts: ['coloer', 'color', 'culor', 'colur'], ans: 1, diff: 2 },
+                { q: '动物', hint: '🐾 小猫小狗都是', opts: ['anmal', 'anemal', 'animal', 'animel'], ans: 2, diff: 2 },
+                { q: '谢谢', hint: '🙏 表达感谢', opts: ['thank', 'thinks', 'thenk', 'thunk'], ans: 0, diff: 2 },
+                { q: '美丽的', hint: '💐 形容好看', opts: ['beatiful', 'beautful', 'beautiful', 'bautiful'], ans: 2, diff: 3 },
+                { q: '图书馆', hint: '📚 看书的地方', opts: ['libary', 'librery', 'library', 'librery'], ans: 2, diff: 3 },
+                { q: '最喜欢的', hint: '❤️ 你最喜欢的', opts: ['favorite', 'favourite', 'favrite', 'favurite'], ans: 0, diff: 3 },
+                { q: '星期三', hint: '📅 一周的中间', opts: ['Wensday', 'Wednsday', 'Wednesday', 'Wedensday'], ans: 2, diff: 3 },
+                { q: '早餐', hint: '🌅 早上吃的饭', opts: ['breakfirst', 'brekfast', 'breakfest', 'breakfast'], ans: 3, diff: 3 },
+            ],
+            // -------- 英译中 --------
+            translate: [
+                { q: 'apple', hint: '这是什么水果？', opts: ['苹果', '香蕉', '橘子', '西瓜'], ans: 0, diff: 1 },
+                { q: 'cat', hint: '这是什么动物？', opts: ['狗', '猫', '鸟', '鱼'], ans: 1, diff: 1 },
+                { q: 'dog', hint: '这是什么动物？', opts: ['猫', '鸟', '狗', '兔子'], ans: 2, diff: 1 },
+                { q: 'book', hint: '这是什么东西？', opts: ['笔', '纸', '本子', '书'], ans: 3, diff: 1 },
+                { q: 'sun', hint: '天上的', opts: ['月亮', '星星', '太阳', '云'], ans: 2, diff: 1 },
+                { q: 'water', hint: '透明的液体', opts: ['果汁', '牛奶', '水', '茶'], ans: 2, diff: 1 },
+                { q: 'school', hint: '你去哪里学习？', opts: ['家', '公园', '医院', '学校'], ans: 3, diff: 1 },
+                { q: 'happy', hint: '你的心情', opts: ['伤心', '开心', '生气', '害怕'], ans: 1, diff: 1 },
+                { q: 'big', hint: '和大相反的是？', opts: ['小', '大', '长', '短'], ans: 0, diff: 1 },
+                { q: 'small', hint: '和小相反的是？', opts: ['大', '小', '高', '矮'], ans: 1, diff: 2 },
+                { q: 'bird', hint: '在天上飞的', opts: ['鱼', '蛇', '鸟', '马'], ans: 2, diff: 2 },
+                { q: 'fish', hint: '在水里游的', opts: ['青蛙', '鱼', '虾', '蟹'], ans: 1, diff: 2 },
+                { q: 'teacher', hint: '教你知识的人', opts: ['医生', '警察', '老师', '司机'], ans: 2, diff: 2 },
+                { q: 'friend', hint: '和你一起玩的人', opts: ['敌人', '陌生人', '对手', '朋友'], ans: 3, diff: 2 },
+                { q: 'red', hint: '这是什么颜色？', opts: ['蓝色', '红色', '绿色', '黄色'], ans: 1, diff: 2 },
+                { q: 'blue', hint: '天空是什么颜色？', opts: ['红色', '绿色', '蓝色', '白色'], ans: 2, diff: 2 },
+                { q: 'moon', hint: '晚上天上有什么？', opts: ['太阳', '月亮', '星星', '云'], ans: 1, diff: 2 },
+                { q: 'pencil', hint: '写字用的', opts: ['尺子', '橡皮', '铅笔', '钢笔'], ans: 2, diff: 3 },
+                { q: 'chair', hint: '用来坐的家具', opts: ['桌子', '床', '椅子', '柜子'], ans: 2, diff: 3 },
+                { q: 'flower', hint: '花园里有什么？', opts: ['草', '树', '石头', '花'], ans: 3, diff: 3 },
+                { q: 'kitchen', hint: '做饭的地方', opts: ['卧室', '客厅', '厨房', '厕所'], ans: 2, diff: 3 },
+                { q: 'banana', hint: '黄色的水果', opts: ['苹果', '香蕉', '葡萄', '桃子'], ans: 1, diff: 3 },
+                { q: 'green', hint: '草是什么颜色？', opts: ['红色', '蓝色', '绿色', '黄色'], ans: 2, diff: 3 },
+                { q: 'car', hint: '四个轮子的交通工具', opts: ['自行车', '汽车', '火车', '飞机'], ans: 1, diff: 3 },
+                { q: 'tree', hint: '高大的植物', opts: ['花', '草', '树', '蘑菇'], ans: 2, diff: 3 },
+                // --- 新增题目 ---
+                { q: 'hello', hint: '见面时说的话', opts: ['再见', '你好', '谢谢', '对不起'], ans: 1, diff: 1 },
+                { q: 'goodbye', hint: '分别时说的话', opts: ['你好', '再见', '早上好', '晚上好'], ans: 1, diff: 1 },
+                { q: 'yes', hint: '表示同意', opts: ['不', '是/对', '也许', '当然'], ans: 1, diff: 1 },
+                { q: 'no', hint: '表示不同意', opts: ['是', '好', '不', '行'], ans: 2, diff: 1 },
+                { q: 'mother', hint: '最爱你的女人', opts: ['爸爸', '妈妈', '姐姐', '奶奶'], ans: 1, diff: 1 },
+                { q: 'breakfast', hint: '一天的第一顿饭', opts: ['午餐', '晚餐', '早餐', '点心'], ans: 2, diff: 2 },
+                { q: 'dinner', hint: '晚上的那顿饭', opts: ['早餐', '午餐', '晚餐', '夜宵'], ans: 2, diff: 2 },
+                { q: 'weather', hint: '外面是晴是雨', opts: ['季节', '天气', '温度', '气候'], ans: 1, diff: 2 },
+                { q: 'music', hint: '🎵 好听的声音', opts: ['画画', '舞蹈', '音乐', '诗歌'], ans: 2, diff: 2 },
+                { q: 'garden', hint: '🌻 种花的地方', opts: ['厨房', '教室', '操场', '花园'], ans: 3, diff: 2 },
+                { q: 'telephone', hint: '☎️ 用来通话', opts: ['电视', '电脑', '电话', '电灯'], ans: 2, diff: 3 },
+                { q: 'umbrella', hint: '🌂 下雨天要用', opts: ['雨衣', '雨伞', '雨鞋', '雨披'], ans: 1, diff: 3 },
+                { q: 'holiday', hint: '🏖️ 不用上学的日子', opts: ['周末', '节日/假期', '生日', '纪念日'], ans: 1, diff: 3 },
+                { q: 'newspaper', hint: '📰 每天出版的读物', opts: ['杂志', '书本', '报纸', '信件'], ans: 2, diff: 3 },
+                { q: 'hospital', hint: '🏥 生病去的地方', opts: ['学校', '银行', '医院', '超市'], ans: 2, diff: 3 },
+            ],
+            // -------- 看图识词 --------
+            emoji: [
+                { q: '🍎', hint: '这是什么水果？', opts: ['banana', 'apple', 'orange', 'grape'], ans: 1, diff: 1 },
+                { q: '🐱', hint: '这是什么动物？', opts: ['dog', 'bird', 'cat', 'fish'], ans: 2, diff: 1 },
+                { q: '🐕', hint: '这是什么动物？', opts: ['cat', 'dog', 'rabbit', 'duck'], ans: 1, diff: 1 },
+                { q: '☀️', hint: '天上有什么？', opts: ['moon', 'star', 'cloud', 'sun'], ans: 3, diff: 1 },
+                { q: '🌙', hint: '晚上天上的', opts: ['sun', 'moon', 'star', 'rain'], ans: 1, diff: 1 },
+                { q: '🌸', hint: '植物的一部分', opts: ['leaf', 'tree', 'flower', 'grass'], ans: 2, diff: 1 },
+                { q: '🐟', hint: '在水里游', opts: ['bird', 'fish', 'snake', 'frog'], ans: 1, diff: 1 },
+                { q: '🐦', hint: '在天上飞', opts: ['fish', 'butterfly', 'bird', 'bee'], ans: 2, diff: 1 },
+                { q: '🍌', hint: '黄色的水果', opts: ['apple', 'pear', 'banana', 'peach'], ans: 2, diff: 1 },
+                { q: '🚗', hint: '四个轮子的', opts: ['bike', 'car', 'bus', 'train'], ans: 1, diff: 2 },
+                { q: '🏫', hint: '你去这里学习', opts: ['park', 'hospital', 'school', 'library'], ans: 2, diff: 2 },
+                { q: '✏️', hint: '写字用的', opts: ['ruler', 'pencil', 'eraser', 'pen'], ans: 1, diff: 2 },
+                { q: '🪑', hint: '用来坐的', opts: ['table', 'bed', 'chair', 'door'], ans: 2, diff: 2 },
+                { q: '📖', hint: '用来阅读', opts: ['book', 'notebook', 'paper', 'map'], ans: 0, diff: 2 },
+                { q: '🔴', hint: '这是什么颜色？', opts: ['yellow', 'blue', 'green', 'red'], ans: 3, diff: 2 },
+                { q: '🔵', hint: '天空的颜色', opts: ['red', 'blue', 'green', 'white'], ans: 1, diff: 2 },
+                { q: '🟢', hint: '草的颜色', opts: ['red', 'blue', 'green', 'yellow'], ans: 2, diff: 2 },
+                { q: '🍊', hint: '橙色的水果', opts: ['apple', 'banana', 'orange', 'grape'], ans: 2, diff: 3 },
+                { q: '🍓', hint: '红色的小水果', opts: ['watermelon', 'strawberry', 'cherry', 'apple'], ans: 1, diff: 3 },
+                { q: '🌳', hint: '高大的植物', opts: ['flower', 'tree', 'grass', 'bush'], ans: 1, diff: 3 },
+                { q: '🍉', hint: '绿色外皮红色果肉', opts: ['watermelon', 'apple', 'pear', 'orange'], ans: 0, diff: 3 },
+                { q: '🐰', hint: '长耳朵的动物', opts: ['cat', 'dog', 'rabbit', 'mouse'], ans: 2, diff: 3 },
+                { q: '🐒', hint: '喜欢爬树吃香蕉', opts: ['monkey', 'elephant', 'tiger', 'lion'], ans: 0, diff: 3 },
+                { q: '🐘', hint: '体型最大的陆地动物', opts: ['tiger', 'elephant', 'giraffe', 'bear'], ans: 1, diff: 3 },
+                { q: '🦁', hint: '森林之王', opts: ['tiger', 'lion', 'wolf', 'fox'], ans: 1, diff: 3 },
+                // --- 新增题目 ---
+                { q: '🐶', hint: '这是什么动物？', opts: ['cat', 'dog', 'bird', 'fish'], ans: 1, diff: 1 },
+                { q: '🐼', hint: '黑白色的动物', opts: ['bear', 'panda', 'rabbit', 'horse'], ans: 1, diff: 1 },
+                { q: '🐧', hint: '不会飞的鸟', opts: ['duck', 'chicken', 'penguin', 'swan'], ans: 2, diff: 1 },
+                { q: '🐸', hint: '绿色的，会跳', opts: ['frog', 'fish', 'snake', 'turtle'], ans: 0, diff: 1 },
+                { q: '🦋', hint: '有漂亮翅膀', opts: ['bird', 'butterfly', 'bee', 'dragonfly'], ans: 1, diff: 1 },
+                { q: '🐬', hint: '海洋里的聪明动物', opts: ['fish', 'shark', 'dolphin', 'whale'], ans: 2, diff: 2 },
+                { q: '🦉', hint: '晚上活动的鸟，很聪明', opts: ['owl', 'eagle', 'crow', 'parrot'], ans: 0, diff: 2 },
+                { q: '🐊', hint: '水里的爬行动物', opts: ['lizard', 'snake', 'crocodile', 'turtle'], ans: 2, diff: 2 },
+                { q: '🦊', hint: '橙色的，很狡猾', opts: ['wolf', 'fox', 'dog', 'tiger'], ans: 1, diff: 2 },
+                { q: '🦒', hint: '脖子最长的动物', opts: ['elephant', 'giraffe', 'horse', 'camel'], ans: 1, diff: 2 },
+                { q: '🌈', hint: '雨后的天空', opts: ['cloud', 'rainbow', 'lightning', 'thunder'], ans: 1, diff: 3 },
+                { q: '🎪', hint: '表演节目的地方', opts: ['theatre', 'circus', 'museum', 'cinema'], ans: 1, diff: 3 },
+                { q: '⚓', hint: '船用的东西', opts: ['anchor', 'sail', 'wheel', 'rope'], ans: 0, diff: 3 },
+                { q: '🎭', hint: '表演用的面具', opts: ['mask', 'hat', 'glasses', 'crown'], ans: 0, diff: 3 },
+                { q: '🎠', hint: '游乐园里转圈圈的', opts: ['swing', 'slide', 'merry-go-round', 'rollercoaster'], ans: 2, diff: 3 },
+            ],
+            // -------- 读句子 --------
+            sentence: [
+                { q: 'I like apples.', hint: '这句话是什么意思？', opts: ['我讨厌苹果', '我喜欢苹果', '我吃苹果', '我有苹果'], ans: 1, diff: 1 },
+                { q: 'This is a cat.', hint: '这句话是什么意思？', opts: ['那是一只猫', '这是一只猫', '这是一只狗', '那是一只狗'], ans: 1, diff: 1 },
+                { q: 'I go to school.', hint: '这句话是什么意思？', opts: ['我回家', '我去公园', '我去学校', '我睡觉'], ans: 2, diff: 1 },
+                { q: 'The sun is big.', hint: '这句话是什么意思？', opts: ['太阳很大', '月亮很亮', '星星很多', '天空很蓝'], ans: 0, diff: 1 },
+                { q: 'I have a book.', hint: '这句话是什么意思？', opts: ['我丢了一本书', '我买了一本书', '我有一本书', '我看了一本书'], ans: 2, diff: 1 },
+                { q: 'The bird can fly.', hint: '这句话是什么意思？', opts: ['鸟会游泳', '鸟会飞', '鸟会跑', '鸟会跳'], ans: 1, diff: 1 },
+                { q: 'She is happy.', hint: '她怎么了？', opts: ['她很难过', '她很开心', '她很生气', '她很累'], ans: 1, diff: 1 },
+                { q: 'I love my mom.', hint: '这句话是什么意思？', opts: ['我爱我的爸爸', '我爱我的妈妈', '我爱我的老师', '我爱我的朋友'], ans: 1, diff: 1 },
+                { q: 'This is a red apple.', hint: '这是一个什么样的苹果？', opts: ['绿色的', '黄色的', '红色的', '大的'], ans: 2, diff: 1 },
+                { q: 'The dog is running.', hint: '狗在做什么？', opts: ['睡觉', '吃东西', '跑步', '游泳'], ans: 2, diff: 2 },
+                { q: 'I can see a star.', hint: '我看到了什么？', opts: ['月亮', '太阳', '星星', '云'], ans: 2, diff: 2 },
+                { q: 'The fish is small.', hint: '鱼怎么样？', opts: ['很大', '很小', '很长', '很胖'], ans: 1, diff: 2 },
+                { q: 'We are friends.', hint: '这句话是什么意思？', opts: ['我们是同学', '我们是朋友', '我们是家人', '我们是邻居'], ans: 1, diff: 2 },
+                { q: 'The flower is red.', hint: '花是什么颜色？', opts: ['黄色', '蓝色', '红色', '白色'], ans: 2, diff: 2 },
+                { q: 'I have two cats.', hint: '我有几只猫？', opts: ['一只', '两只', '三只', '很多'], ans: 1, diff: 2 },
+                { q: 'She reads a book.', hint: '她在做什么？', opts: ['写字', '画画', '读书', '唱歌'], ans: 2, diff: 2 },
+                { q: 'The sky is blue.', hint: '天空是什么颜色？', opts: ['红色', '白色', '蓝色', '灰色'], ans: 2, diff: 2 },
+                { q: 'I like to draw.', hint: '我喜欢做什么？', opts: ['唱歌', '跳舞', '画画', '跑步'], ans: 2, diff: 3 },
+                { q: 'Good morning!', hint: '什么时候说的话？', opts: ['晚上', '下午', '早上', '中午'], ans: 2, diff: 3 },
+                { q: 'Thank you!', hint: '什么时候说？', opts: ['请求时', '道歉时', '感谢时', '告别时'], ans: 2, diff: 3 },
+                { q: 'I am seven years old.', hint: '这句话在说什么？', opts: ['我七岁', '我上学', '我一年级', '我七点起床'], ans: 0, diff: 3 },
+                { q: 'The pencil is on the table.', hint: '铅笔在哪里？', opts: ['在书包里', '在桌子上', '在地上', '在椅子上'], ans: 1, diff: 3 },
+                { q: 'My father is tall.', hint: '爸爸怎么样？', opts: ['很矮', '很高', '很胖', '很瘦'], ans: 1, diff: 3 },
+                { q: 'Let\'s play together!', hint: '这句话在说什么？', opts: ['一起学习', '一起玩', '一起吃饭', '一起回家'], ans: 1, diff: 3 },
+                { q: 'I can swim.', hint: '我会做什么？', opts: ['跑步', '游泳', '跳绳', '踢球'], ans: 1, diff: 3 },
+                // --- 新增题目 ---
+                { q: 'I am a student.', hint: '这句话在说什么？', opts: ['我是老师', '我是学生', '我是医生', '我是警察'], ans: 1, diff: 1 },
+                { q: 'She is my friend.', hint: '她是谁？', opts: ['我的妈妈', '我的老师', '我的朋友', '我的姐姐'], ans: 2, diff: 1 },
+                { q: 'The cat is white.', hint: '猫是什么颜色？', opts: ['黑色', '白色', '黄色', '灰色'], ans: 1, diff: 1 },
+                { q: 'I like to eat.', hint: '我喜欢做什么？', opts: ['喝水', '睡觉', '吃东西', '跑步'], ans: 2, diff: 1 },
+                { q: 'He is a boy.', hint: '他是？', opts: ['女孩', '男孩', '男人', '老师'], ans: 1, diff: 1 },
+                { q: 'My mother is a teacher.', hint: '妈妈是做什么的？', opts: ['医生', '老师', '护士', '警察'], ans: 1, diff: 2 },
+                { q: 'I have three books.', hint: '我有几本书？', opts: ['两本', '三本', '四本', '一本'], ans: 1, diff: 2 },
+                { q: 'The ball is under the table.', hint: '球在哪里？', opts: ['桌子上', '桌子下', '桌子旁', '桌子里'], ans: 1, diff: 2 },
+                { q: 'She puts on her hat.', hint: '她在做什么？', opts: ['脱帽子', '戴帽子', '洗帽子', '买帽子'], ans: 1, diff: 2 },
+                { q: 'The dog is eating a bone.', hint: '狗在做什么？', opts: ['喝水', '吃肉', '啃骨头', '睡觉'], ans: 2, diff: 2 },
+                { q: 'He goes to school by bus every day.', hint: '他怎么去学校？', opts: ['走路', '骑车', '坐公交', '坐地铁'], ans: 2, diff: 3 },
+                { q: 'My sister is older than me.', hint: '姐姐比我？', opts: ['小', '大', '矮', '胖'], ans: 1, diff: 3 },
+                { q: 'There are seven days in a week.', hint: '这句话在说什么？', opts: ['一周有五天', '一周有七天', '一天有七小时', '一周有七天假'], ans: 1, diff: 3 },
+                { q: 'The museum is between the bank and the park.', hint: '博物馆在哪里？', opts: ['银行旁边', '公园旁边', '银行和公园之间', '银行对面'], ans: 2, diff: 3 },
+                { q: 'If it rains tomorrow, I will stay at home.', hint: '如果明天下雨，我会？', opts: ['出去玩', '去上学', '待在家', '去公园'], ans: 2, diff: 3 },
+            ],
+            // -------- 应答句 --------
+            response: [
+                // 简单 diff:1
+                { q: 'How are you?', hint: '别人问候你', opts: ['I\'m fine, thank you.', 'I\'m five.', 'I\'m a student.', 'Goodbye!'], ans: 0, diff: 1 },
+                { q: 'What\'s your name?', hint: '别人问你名字', opts: ['I\'m 7 years old.', 'My name is Tom.', 'I like apples.', 'I\'m from China.'], ans: 1, diff: 1 },
+                { q: 'Nice to meet you!', hint: '初次见面', opts: ['Goodbye!', 'Thank you!', 'Nice to meet you too!', 'Sorry!'], ans: 2, diff: 1 },
+                { q: 'Good morning!', hint: '早上好', opts: ['Good night!', 'Good morning!', 'Goodbye!', 'Thank you!'], ans: 1, diff: 1 },
+                { q: 'Thank you!', hint: '别人感谢你', opts: ['Yes, please.', 'You\'re welcome.', 'Thank you too.', 'I\'m sorry.'], ans: 1, diff: 1 },
+                { q: 'How old are you?', hint: '别人问你年龄', opts: ['I\'m fine.', 'I\'m 8 years old.', 'I\'m a boy.', 'I\'m tall.'], ans: 1, diff: 1 },
+                // 普通 diff:2
+                { q: 'Where are you from?', hint: '别人问你来自哪里', opts: ['I\'m from China.', 'I\'m a student.', 'I\'m 9 years old.', 'I like reading.'], ans: 0, diff: 2 },
+                { q: 'What\'s this? (pointing to a book)', hint: '问这是什么', opts: ['It\'s a pen.', 'It\'s a book.', 'It\'s a desk.', 'It\'s a bag.'], ans: 1, diff: 2 },
+                { q: 'Can you swim?', hint: '问你会不会游泳', opts: ['Yes, I do.', 'Yes, I can.', 'Yes, I am.', 'Yes, I like.'], ans: 1, diff: 2 },
+                { q: 'Do you like apples?', hint: '问你喜欢苹果吗', opts: ['Yes, I can.', 'Yes, I am.', 'Yes, I do.', 'Yes, I like.'], ans: 2, diff: 2 },
+                { q: 'What time is it?', hint: '问现在几点', opts: ['It\'s 7 o\'clock.', 'It\'s Monday.', 'It\'s sunny.', 'It\'s 2026.'], ans: 0, diff: 2 },
+                { q: 'What day is it today?', hint: '问今天星期几', opts: ['It\'s 7 o\'clock.', 'It\'s Monday.', 'It\'s January.', 'It\'s 2026.'], ans: 1, diff: 2 },
+                { q: 'Is this your pencil?', hint: '问这是你的铅笔吗', opts: ['Yes, it is.', 'Yes, I am.', 'Yes, I do.', 'Yes, there is.'], ans: 0, diff: 2 },
+                // 困难 diff:3
+                { q: 'Would you like some tea?', hint: '问你要不要喝茶', opts: ['Yes, I like.', 'Yes, please.', 'Yes, I would.', 'Yes, I do.'], ans: 1, diff: 3 },
+                { q: 'How much is this book?', hint: '问这本书多少钱', opts: ['It\'s 20 yuan.', 'It\'s 20 pages.', 'It\'s 20 cm.', 'It\'s 20 kg.'], ans: 0, diff: 3 },
+                { q: 'Whose bag is this?', hint: '问这是谁的包', opts: ['It\'s a bag.', 'It\'s Tom.', 'It\'s Tom\'s.', 'It\'s a Tom bag.'], ans: 2, diff: 3 },
+                { q: 'How do you go to school?', hint: '问你怎么去学校', opts: ['I go to school every day.', 'I like school.', 'By bus.', 'At 7 o\'clock.'], ans: 2, diff: 3 },
+                { q: 'What does your mother do?', hint: '问你妈妈做什么工作', opts: ['She is tall.', 'She is a teacher.', 'She is cooking.', 'She is nice.'], ans: 1, diff: 3 },
+                { q: 'Have you ever been to Beijing?', hint: '问你去过北京吗', opts: ['Yes, I went last year.', 'Yes, I like Beijing.', 'Yes, I go.', 'Yes, I will.'], ans: 0, diff: 3 },
+                { q: 'What\'s the weather like today?', hint: '问今天天气怎么样', opts: ['It\'s 25 degrees.', 'It\'s sunny.', 'It\'s December.', 'It\'s Wednesday.'], ans: 1, diff: 3 },
+            ],
+            // -------- 阅读理解 --------
+            reading: [
+                // 简单 diff:1
+                { q: 'Tom has a cat. The cat is black and white. It likes to play with a ball.\n\nWhat color is Tom\'s cat?', hint: 'Read and answer', opts: ['Black', 'White', 'Black and white', 'Brown'], ans: 2, diff: 1 },
+                { q: 'I get up at 7 o\'clock. Then I brush my teeth and wash my face. I have breakfast at 7:30.\n\nWhat time do I get up?', hint: 'Read and answer', opts: ['6:00', '7:00', '7:30', '8:00'], ans: 1, diff: 1 },
+                { q: 'This is my school. It is big and beautiful. There are many trees and flowers in it.\n\nMy school is ___.', hint: 'Read and answer', opts: ['small', 'big and beautiful', 'old', 'far'], ans: 1, diff: 1 },
+                { q: 'I have a dog. Its name is Lucky. Lucky is brown. It likes to run in the park.\n\nWhat is the dog\'s name?', hint: 'Read and answer', opts: ['Lucky', 'Brown', 'Park', 'Dog'], ans: 0, diff: 1 },
+                { q: 'There are five people in my family. They are my grandpa, grandma, father, mother and me. I love my family.\n\nHow many people are in my family?', hint: 'Read and answer', opts: ['Four', 'Five', 'Six', 'Three'], ans: 1, diff: 1 },
+                // 普通 diff:2
+                { q: 'Lily is a girl. She is 9 years old. She likes drawing very much. She draws every day. Her favorite color is blue. She wants to be an artist.\n\nWhat does Lily want to be?', hint: 'Read and answer', opts: ['A teacher', 'An artist', 'A doctor', 'A singer'], ans: 1, diff: 2 },
+                { q: 'We have a new classroom. It is very big. There are 30 desks and 30 chairs in it. There is a blackboard on the wall. The teacher\'s desk is in front of the blackboard.\n\nHow many desks are in the classroom?', hint: 'Read and answer', opts: ['20', '25', '30', '35'], ans: 2, diff: 2 },
+                { q: 'It\'s raining today. I can\'t go out to play. I stay at home and read a book. My mother makes me a cup of hot chocolate. It tastes good. I like rainy days.\n\nWhy can\'t I go out?', hint: 'Read and answer', opts: ['It\'s too hot', 'It\'s raining', 'I\'m sick', 'It\'s too late'], ans: 1, diff: 2 },
+                { q: 'My father is a doctor. He works in a big hospital. He gets up early every day. He helps sick people. I am proud of him.\n\nWhere does my father work?', hint: 'Read and answer', opts: ['In a school', 'In a hospital', 'In a bank', 'In a shop'], ans: 1, diff: 2 },
+                { q: 'Summer is my favorite season. I can go swimming. I can eat ice cream. I can wear T-shirts and shorts. The days are long and the sun is bright.\n\nWhy does the writer like summer?', hint: 'Read and answer', opts: ['Because it\'s cold', 'Because it\'s long', 'Because she can swim and eat ice cream', 'Because she can sleep'], ans: 2, diff: 2 },
+                { q: 'Tom and Jerry are good friends. They go to the same school. Tom is tall. Jerry is short. They both like playing basketball. After school, they often play together.\n\nWhat do Tom and Jerry like?', hint: 'Read and answer', opts: ['Reading', 'Playing basketball', 'Swimming', 'Singing'], ans: 1, diff: 2 },
+                { q: 'The library is open from 9:00 am to 6:00 pm. You can borrow up to 5 books at a time. You must return them in two weeks.\n\nHow many books can you borrow at a time?', hint: 'Read and answer', opts: ['2', '3', '5', '10'], ans: 2, diff: 2 },
+                // 困难 diff:3
+                { q: 'Once upon a time, there was a little rabbit. He was very proud of his long ears. He always said, "My ears are the longest!" One day, a wise old owl said, "Being proud is not good. Everyone has their own strengths." The rabbit learned a lesson.\n\nWhat lesson did the rabbit learn?', hint: 'Read and answer', opts: ['Ears are important', 'Being proud is not good', 'Owls are wise', 'Rabbits have long ears'], ans: 1, diff: 3 },
+                { q: 'The Earth is our home. It has land, water, and air. Plants and animals live on Earth. We should take care of our Earth. We should not litter. We should save water and plant more trees.\n\nWhat should we NOT do?', hint: 'Read and answer', opts: ['Save water', 'Plant trees', 'Litter', 'Take care of Earth'], ans: 2, diff: 3 },
+                { q: 'Sally wants to buy a birthday gift for her mother. She has 50 yuan. She sees a beautiful scarf. It costs 45 yuan. She also sees a nice hat. It costs 55 yuan. She buys the scarf.\n\nWhy doesn\'t Sally buy the hat?', hint: 'Read and answer', opts: ['She doesn\'t like it', 'It\'s too expensive', 'It\'s ugly', 'Her mother doesn\'t like hats'], ans: 1, diff: 3 },
+                { q: 'Tom woke up late today. He looked at the clock. It was 8:15! School starts at 8:00. He got dressed quickly. He didn\'t have time for breakfast. He ran all the way to school. When he got there, the first class had already started.\n\nWhy was Tom late?', hint: 'Read and answer', opts: ['He missed the bus', 'He woke up late', 'He walked slowly', 'He had a long breakfast'], ans: 1, diff: 3 },
+                { q: 'Penguins are birds, but they cannot fly. They live in very cold places like Antarctica. They have thick feathers to keep warm. They are good swimmers. They eat fish and krill. Penguins walk in a funny way, but they can slide on the ice.\n\nWhere do penguins live?', hint: 'Read and answer', opts: ['In forests', 'In hot places', 'In cold places like Antarctica', 'In deserts'], ans: 2, diff: 3 },
+                { q: 'Mike\'s family went to the beach last weekend. They swam in the sea. They built a sandcastle. Mike\'s sister collected seashells. They had a picnic on the beach. Everyone had a great time.\n\nWhat did Mike\'s sister do?', hint: 'Read and answer', opts: ['Swam', 'Built a sandcastle', 'Collected seashells', 'Had a picnic'], ans: 2, diff: 3 },
+            ],
+            // -------- TF判断 --------
+            tfreading: [
+                // 简单 diff:1
+                { q: 'The sky is blue.\n\nIs the sky blue?', hint: 'Read and judge', opts: ['✓ True', '✗ False'], ans: 0, diff: 1 },
+                { q: 'Cats can fly.\n\nCan cats fly?', hint: 'Read and judge', opts: ['✓ True', '✗ False'], ans: 1, diff: 1 },
+                { q: 'We eat breakfast in the morning.\n\nDo we eat breakfast in the morning?', hint: 'Read and judge', opts: ['✓ True', '✗ False'], ans: 0, diff: 1 },
+                { q: 'Fish live in trees.\n\nDo fish live in trees?', hint: 'Read and judge', opts: ['✓ True', '✗ False'], ans: 1, diff: 1 },
+                { q: 'The sun is very hot.\n\nIs the sun hot?', hint: 'Read and judge', opts: ['✓ True', '✗ False'], ans: 0, diff: 1 },
+                // 普通 diff:2
+                { q: 'Water turns into ice at 100°C.\n\nWater turns into ice at 100°C.', hint: 'Read and judge', opts: ['✓ True', '✗ False'], ans: 1, diff: 2 },
+                { q: 'There are 7 days in a week.\n\nThere are 7 days in a week.', hint: 'Read and judge', opts: ['✓ True', '✗ False'], ans: 0, diff: 2 },
+                { q: 'Tom is taller than Jerry. Jerry is 100cm tall. Tom is 120cm tall.\n\nJerry is taller than Tom.', hint: 'Read and judge', opts: ['✓ True', '✗ False'], ans: 1, diff: 2 },
+                { q: 'Elephants are the largest land animals.\n\nElephants are the largest land animals.', hint: 'Read and judge', opts: ['✓ True', '✗ False'], ans: 0, diff: 2 },
+                { q: 'The moon is bigger than the sun.\n\nIs the moon bigger than the sun?', hint: 'Read and judge', opts: ['✓ True', '✗ False'], ans: 1, diff: 2 },
+                // 困难 diff:3
+                { q: 'China is the largest country in the world. Russia is larger.\n\nChina is the largest country in the world.', hint: 'Read and judge', opts: ['✓ True', '✗ False'], ans: 1, diff: 3 },
+                { q: 'April, June, September and November have 30 days.\n\nApril, June, September and November have 30 days.', hint: 'Read and judge', opts: ['✓ True', '✗ False'], ans: 0, diff: 3 },
+                { q: 'The Amazon is the longest river in the world. The Nile is longer.\n\nThe Amazon is the longest river.', hint: 'Read and judge', opts: ['✓ True', '✗ False'], ans: 1, diff: 3 },
+                { q: 'Humans need oxygen to survive.\n\nHumans need oxygen to survive.', hint: 'Read and judge', opts: ['✓ True', '✗ False'], ans: 0, diff: 3 },
+                { q: 'Light travels faster than sound.\n\nLight travels faster than sound.', hint: 'Read and judge', opts: ['✓ True', '✗ False'], ans: 0, diff: 3 },
+            ],
+        };
+
+        const catNames = {
+            spell: '🔤 单词拼写',
+            translate: '🌏 英译中',
+            emoji: '🎨 看图识词',
+            sentence: '📜 读句子',
+            response: '💬 应答句',
+            reading: '📖 阅读理解',
+            tfreading: '✅ TF判断',
+        };
+
+        const diffNames = {
+            1: '🍭 简单',
+            2: '🍫 普通',
+            3: '🔥 困难',
+        };
+
+        // ============================================================
+        //  DOM 引用
+        // ============================================================
+        const startOverlay = document.getElementById('startOverlay');
+        const quizArea = document.getElementById('quizArea');
+        const catInfo = document.getElementById('catInfo');
+        const questionText = document.getElementById('questionText');
+        const questionLabel = document.getElementById('questionLabel');
+        const questionNumber = document.getElementById('questionNumber');
+        const questionHint = document.getElementById('questionHint');
+        const answerButtons = document.querySelectorAll('.answer-btn');
+        const answerArea = document.getElementById('answerArea');
+        const feedback = document.getElementById('feedback');
+        const currentQEl = document.getElementById('currentQ');
+        const totalQEl = document.getElementById('totalQ');
+        const scoreEl = document.getElementById('score');
+        const timerEl = document.getElementById('timer');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const overlay = document.getElementById('overlay');
+        const resultTitle = document.getElementById('resultTitle');
+        const finalCat = document.getElementById('finalCat');
+        const finalScore = document.getElementById('finalScore');
+        const finalTotal = document.getElementById('finalTotal');
+        const finalTime = document.getElementById('finalTime');
+        const finalPercent = document.getElementById('finalPercent');
+
+        // ============================================================
+        //  状态变量
+        // ============================================================
+        let currentQuestion = 0;
+        let score = 0;
+        let timer = 0;
+        let timerInterval = null;
+        let countdownInterval = null;
+        let countdownValue = 0;
+        let category = 'spell';
+        let currentQuestions = [];
+        let currentAnswer = 0;
+        let isPlaying = false;
+        let gameMode = 'study'; // 'study' | 'challenge' | 'timer'
+
+        // 学习模式
+        let studyDifficulty = 1;
+
+        // 挑战赛
+        let challengeCat = 'spell';
+        let challengeDiff = 1;
+        let challengeCount = 10;
+        let challengeTimeLimit = 60;
+
+        // 计时赛
+        let timerCat = 'spell';
+        let timerDiff = 1;
+
+        // ============================================================
+        //  音效
+        // ============================================================
+        const QuizAudio = (() => {
+            let ctx = null;
+            function init() {
+                if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+                if (ctx.state === 'suspended') ctx.resume();
+            }
+            function playTone(freq, type, duration) {
+                init();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + duration);
+            }
+            return {
+                init() { init(); },
+                correct() {
+                    playTone(600, 'sine', 0.1);
+                    setTimeout(() => playTone(800, 'sine', 0.1), 100);
+                    setTimeout(() => playTone(1000, 'sine', 0.2), 200);
+                },
+                wrong() {
+                    playTone(300, 'sawtooth', 0.3);
+                    setTimeout(() => playTone(250, 'sawtooth', 0.3), 150);
+                },
+                victory() {
+                    const notes = [523, 659, 784, 1047];
+                    notes.forEach((n, i) => setTimeout(() => playTone(n, 'sine', 0.3), i * 150));
+                }
+            };
+        })();
+
+        // ============================================================
+        //  工具函数
+        // ============================================================
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function filterQuestions(cat, diff) {
+            return questionBank[cat].filter(q => q.diff === diff);
+        }
+
+        function preGenerateQuestions(cat, diff, count) {
+            const filtered = filterQuestions(cat, diff);
+            const shuffled = shuffleArray([...filtered]);
+            return shuffled.slice(0, Math.min(count, shuffled.length));
+        }
+
+        // ============================================================
+        //  模式切换
+        // ============================================================
+        function switchMode(modeName) {
+            document.querySelectorAll('.mode-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.mode === modeName);
+            });
+            document.querySelectorAll('.mode-panel').forEach(p => {
+                p.style.display = 'none';
+            });
+            document.getElementById('panel-' + modeName).style.display = 'block';
+        }
+
+        // ============================================================
+        //  学习模式 - 难度选择
+        // ============================================================
+        function selectStudyDiff(diff, btn) {
+            studyDifficulty = diff;
+            btn.parentElement.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        // ============================================================
+        //  挑战赛 - 设置选择
+        // ============================================================
+        function selectChallengeCat(cat, btn) {
+            challengeCat = cat;
+            btn.parentElement.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function selectChallengeDiff(diff, btn) {
+            challengeDiff = diff;
+            btn.parentElement.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function selectChallengeCount(count, btn) {
+            challengeCount = count;
+            const container = btn.parentElement;
+            container.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            // 清除自定义输入框
+            const input = container.querySelector('.challenge-input');
+            if (input) input.value = '';
+        }
+
+        function onChallengeCountInput(input) {
+            const val = parseInt(input.value);
+            if (!isNaN(val) && val > 0) {
+                challengeCount = val;
+                // 清除预设按钮选中
+                input.parentElement.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+            }
+        }
+
+        function selectChallengeTime(time, btn) {
+            challengeTimeLimit = time;
+            const container = btn.parentElement;
+            container.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const input = container.querySelector('.challenge-input');
+            if (input) input.value = '';
+        }
+
+        function onChallengeTimeInput(input) {
+            const val = parseInt(input.value);
+            if (!isNaN(val) && val >= 10) {
+                challengeTimeLimit = val;
+                input.parentElement.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+            }
+        }
+
+        // ============================================================
+        //  计时赛 - 设置选择
+        // ============================================================
+        function selectTimerCat(cat, btn) {
+            timerCat = cat;
+            btn.parentElement.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function selectTimerDiff(diff, btn) {
+            timerDiff = diff;
+            btn.parentElement.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        // ============================================================
+        //  学习模式 - 启动
+        // ============================================================
+        function startStudy(cat) {
+            QuizAudio.init();
+            gameMode = 'study';
+            category = cat;
+            currentQuestion = 0;
+            score = 0;
+            timer = 0;
+            isPlaying = true;
+
+            const questions = preGenerateQuestions(cat, studyDifficulty, 10);
+            if (questions.length === 0) {
+                alert('该分类下没有对应难度的题目，请选择其他难度或分类！');
+                return;
+            }
+            currentQuestions = questions;
+
+            startOverlay.style.display = 'none';
+            quizArea.style.display = 'block';
+            catInfo.textContent = '📂 ' + catNames[cat] + ' | ' + diffNames[studyDifficulty];
+            catInfo.style.display = 'block';
+
+            timerDisplay.style.display = 'none';
+
+            scoreEl.textContent = '0';
+            timerEl.textContent = '0';
+            totalQEl.textContent = currentQuestions.length;
+
+            clearAllIntervals();
+            timerInterval = setInterval(() => {
+                timer++;
+                timerEl.textContent = timer;
+            }, 1000);
+
+            displayQuestion();
+        }
+
+        // ============================================================
+        //  挑战赛 - 启动
+        // ============================================================
+        function startChallenge() {
+            QuizAudio.init();
+            gameMode = 'challenge';
+            category = challengeCat;
+            currentQuestion = 0;
+            score = 0;
+            timer = 0;
+            isPlaying = true;
+
+            const questions = preGenerateQuestions(challengeCat, challengeDiff, challengeCount);
+            if (questions.length === 0) {
+                alert('该分类下没有对应难度的题目，请调整设置！');
+                return;
+            }
+            currentQuestions = questions;
+
+            startOverlay.style.display = 'none';
+            quizArea.style.display = 'block';
+            catInfo.textContent = '🏆 ' + catNames[challengeCat] + ' | ' + diffNames[challengeDiff] + ' | 限时' + challengeTimeLimit + '秒';
+            catInfo.style.display = 'block';
+
+            scoreEl.textContent = '0';
+            totalQEl.textContent = currentQuestions.length;
+
+            // 显示倒计时
+            countdownValue = challengeTimeLimit;
+            timerDisplay.style.display = 'block';
+            timerDisplay.textContent = '⏱️ 剩余时间：' + countdownValue + 's';
+            timerEl.textContent = countdownValue;
+
+            clearAllIntervals();
+            // 倒计时
+            countdownInterval = setInterval(() => {
+                countdownValue--;
+                timerDisplay.textContent = '⏱️ 剩余时间：' + countdownValue + 's';
+                timerEl.textContent = countdownValue;
+                if (countdownValue <= 0) {
+                    // 时间到
+                    clearInterval(countdownInterval);
+                    countdownInterval = null;
+                    if (isPlaying) {
+                        isPlaying = false;
+                        showResults();
+                    }
+                }
+            }, 1000);
+
+            displayQuestion();
+        }
+
+        // ============================================================
+        //  计时赛 - 启动
+        // ============================================================
+        function startTimerRace() {
+            QuizAudio.init();
+            gameMode = 'timer';
+            category = timerCat;
+            currentQuestion = 0;
+            score = 0;
+            timer = 0;
+            isPlaying = true;
+
+            const questions = preGenerateQuestions(timerCat, timerDiff, 10);
+            if (questions.length === 0) {
+                alert('该分类下没有对应难度的题目，请调整设置！');
+                return;
+            }
+            currentQuestions = questions;
+
+            startOverlay.style.display = 'none';
+            quizArea.style.display = 'block';
+            catInfo.textContent = '⏱️ ' + catNames[timerCat] + ' | ' + diffNames[timerDiff];
+            catInfo.style.display = 'block';
+
+            timerDisplay.style.display = 'none';
+
+            scoreEl.textContent = '0';
+            timerEl.textContent = '0';
+            totalQEl.textContent = currentQuestions.length;
+
+            clearAllIntervals();
+            timerInterval = setInterval(() => {
+                timer++;
+                timerEl.textContent = timer;
+            }, 1000);
+
+            displayQuestion();
+        }
+
+        // ============================================================
+        //  清除所有计时器
+        // ============================================================
+        function clearAllIntervals() {
+            if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+            if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+        }
+
+        // ============================================================
+        //  显示题目
+        // ============================================================
+        function displayQuestion() {
+            if (currentQuestion >= currentQuestions.length) {
+                if (gameMode === 'challenge' && countdownInterval) {
+                    // 挑战赛提前答完，清除倒计时
+                    clearInterval(countdownInterval);
+                    countdownInterval = null;
+                }
+                isPlaying = false;
+                showResults();
+                return;
+            }
+
+            const q = currentQuestions[currentQuestion];
+            questionNumber.textContent = '第 ' + (currentQuestion + 1) + ' 题';
+            questionText.textContent = q.q;
+            questionHint.textContent = q.hint;
+
+            const catLabels = {
+                spell: '请选择正确的英文拼写：',
+                translate: '请选择正确的中文意思：',
+                emoji: '请选择对应的英文单词：',
+                sentence: '请选择正确的翻译：',
+                response: '请选择正确的应答句：',
+                reading: '请根据短文选择正确答案：',
+                tfreading: '请判断正误：',
+            };
+            questionLabel.textContent = catLabels[category] || '';
+
+            if (category === 'tfreading') {
+                answerArea.classList.add('tf-mode');
+            } else {
+                answerArea.classList.remove('tf-mode');
+            }
+
+            currentAnswer = q.ans;
+
+            answerButtons.forEach((btn, i) => {
+                btn.textContent = q.opts[i];
+                btn.classList.remove('correct', 'wrong');
+                btn.disabled = false;
+                btn.style.display = '';
+            });
+
+            feedback.textContent = '';
+            feedback.classList.remove('correct', 'wrong');
+            currentQEl.textContent = currentQuestion + 1;
+        }
+
+        // ============================================================
+        //  检查答案
+        // ============================================================
+        function checkAnswer(index) {
+            if (!isPlaying) return;
+            answerButtons.forEach(btn => btn.disabled = true);
+
+            if (index === currentAnswer) {
+                answerButtons[index].classList.add('correct');
+                feedback.textContent = '✅ 回答正确！太棒了！';
+                feedback.classList.add('correct');
+                score++;
+                scoreEl.textContent = score;
+                QuizAudio.correct();
+            } else {
+                answerButtons[index].classList.add('wrong');
+                feedback.textContent = '❌ 回答错误！正确答案是：' + currentQuestions[currentQuestion].opts[currentAnswer];
+                feedback.classList.add('wrong');
+                QuizAudio.wrong();
+                answerButtons[currentAnswer].classList.add('correct');
+            }
+
+            currentQuestion++;
+            setTimeout(() => {
+                displayQuestion();
+            }, 1200);
+        }
+
+        // ============================================================
+        //  显示结果
+        // ============================================================
+        function showResults() {
+            clearAllIntervals();
+            QuizAudio.victory();
+
+            const totalQ = currentQuestions.length;
+            const correctRate = Math.round((score / totalQ) * 100);
+
+            if (gameMode === 'challenge') {
+                resultTitle.textContent = '🏆 挑战结束！';
+                finalCat.textContent = catNames[category] + ' | ' + diffNames[challengeDiff];
+                finalScore.textContent = score;
+                finalTotal.textContent = totalQ;
+                finalTime.textContent = challengeTimeLimit - countdownValue;
+                finalPercent.textContent = correctRate + '%';
+            } else if (gameMode === 'timer') {
+                resultTitle.textContent = '⏱️ 计时完成！';
+                finalCat.textContent = catNames[category] + ' | ' + diffNames[timerDiff];
+                finalScore.textContent = score;
+                finalTotal.textContent = totalQ;
+                finalTime.textContent = timer;
+                finalPercent.textContent = correctRate + '%';
+            } else {
+                resultTitle.textContent = '🎉 学习完成！';
+                finalCat.textContent = catNames[category] + ' | ' + diffNames[studyDifficulty];
+                finalScore.textContent = score;
+                finalTotal.textContent = totalQ;
+                finalTime.textContent = timer;
+                finalPercent.textContent = correctRate + '%';
+            }
+
+            overlay.classList.add('show');
+            launchConfetti();
+        }
+
+        // ============================================================
+        //  重新开始 / 返回起始界面
+        // ============================================================
+        function restartGame() {
+            clearAllIntervals();
+            overlay.classList.remove('show');
+            startOverlay.style.display = 'block';
+            quizArea.style.display = 'none';
+            timerDisplay.style.display = 'none';
+            answerArea.classList.remove('tf-mode');
+            currentQuestion = 0;
+            score = 0;
+            timer = 0;
+            countdownValue = 0;
+            isPlaying = false;
+            // 重置模式标签到学习模式
+            switchMode('study');
+        }
+
+        // ============================================================
+        //  五彩纸屑
+        // ============================================================
+        function launchConfetti() {
+            const colors = ['#FF6B6B', '#FFD700', '#48DBFB', '#FF9FF3', '#54a0ff', '#00d2d3', '#f8a5c2', '#FFA500', '#38ef7d'];
+            for (let i = 0; i < 80; i++) {
+                const el = document.createElement('div');
+                el.className = 'confetti';
+                const size = 4 + Math.random() * 6;
+                el.style.width = size + 'px';
+                el.style.height = size + 'px';
+                el.style.background = colors[Math.floor(Math.random() * colors.length)];
+                el.style.left = Math.random() * 100 + '%';
+                el.style.animationDuration = (3 + Math.random() * 3) + 's';
+                el.style.animationDelay = Math.random() * 2 + 's';
+                document.body.appendChild(el);
+            }
+            setTimeout(() => {
+                document.querySelectorAll('.confetti').forEach(el => el.remove());
+            }, 6000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🎡 幸运大转盘</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 50%, #ff9a9e 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* ===== 顶部工具栏 ===== */
+        .toolbar {
+            width: 100%;
+            max-width: 520px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px 8px;
+        }
+
+        .back-link {
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            font-size: 18px;
+            color: #fff;
+            text-decoration: none;
+            background: rgba(255,255,255,0.25);
+            padding: 8px 16px;
+            border-radius: 20px;
+            backdrop-filter: blur(4px);
+            transition: background 0.2s;
+        }
+        .back-link:hover {
+            background: rgba(255,255,255,0.4);
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.15);
+        }
+
+        /* ===== 转盘容器 ===== */
+        .wheel-wrapper {
+            position: relative;
+            width: 340px;
+            height: 340px;
+            margin: 10px auto 0;
+        }
+
+        #wheelCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            box-shadow:
+                0 0 0 8px #fff,
+                0 0 0 12px rgba(255,255,255,0.4),
+                0 8px 32px rgba(0,0,0,0.2);
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: none;
+        }
+
+        /* ===== 指针（固定在顶部） ===== */
+        .pointer {
+            position: absolute;
+            top: -16px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 18px solid transparent;
+            border-right: 18px solid transparent;
+            border-top: 32px solid #FF4757;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+            z-index: 10;
+        }
+        .pointer::after {
+            content: '';
+            position: absolute;
+            top: -38px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 14px;
+            height: 14px;
+            background: #FF4757;
+            border-radius: 50%;
+            border: 3px solid #fff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        /* ===== 中心 GO 按钮 ===== */
+        .center-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 4px solid #fff;
+            background: linear-gradient(135deg, #FF6B6B, #EE5A24);
+            color: #fff;
+            font-family: 'Nunito', sans-serif;
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            z-index: 5;
+            transition: transform 0.15s, box-shadow 0.15s;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        .center-btn:hover {
+            transform: translate(-50%, -50%) scale(1.08);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+        }
+        .center-btn:active {
+            transform: translate(-50%, -50%) scale(0.95);
+        }
+        .center-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        /* ===== 结果文字 ===== */
+        .result {
+            margin: 18px 0 8px;
+            font-size: 22px;
+            font-weight: 800;
+            color: #2d3436;
+            text-align: center;
+            min-height: 40px;
+            padding: 0 16px;
+            transition: opacity 0.3s;
+        }
+        .result.highlight {
+            color: #FF4757;
+            animation: pop 0.5s ease;
+        }
+        @keyframes pop {
+            0%   { transform: scale(0.8); opacity: 0.4; }
+            50%  { transform: scale(1.15); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* ===== 奖项列表 ===== */
+        .prize-list {
+            width: 100%;
+            max-width: 440px;
+            padding: 0 16px;
+            margin-top: 6px;
+            margin-bottom: 24px;
+        }
+        .prize-list-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: rgba(255,255,255,0.9);
+            text-align: center;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.1);
+        }
+        .prize-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+        .prize-item {
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(4px);
+            border-radius: 14px;
+            padding: 10px 6px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: #2d3436;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            word-break: break-all;
+            line-height: 1.3;
+            min-height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        .prize-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+        }
+        .prize-item .emoji {
+            font-size: 18px;
+            margin-bottom: 2px;
+        }
+        .prize-item .name {
+            font-size: 13px;
+        }
+        .prize-item .name[contenteditable="true"] {
+            outline: none;
+            border-bottom: 2px dashed #FF6B6B;
+            background: rgba(255,107,107,0.08);
+            border-radius: 4px;
+            padding: 0 4px;
+        }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 400px) {
+            .wheel-wrapper {
+                width: 290px;
+                height: 290px;
+            }
+            .center-btn {
+                width: 58px;
+                height: 58px;
+                font-size: 18px;
+            }
+            .title {
+                font-size: 20px;
+            }
+            .result {
+                font-size: 18px;
+            }
+            .prize-grid {
+                gap: 6px;
+            }
+            .prize-item {
+                font-size: 12px;
+                padding: 8px 4px;
+                min-height: 44px;
+            }
+            .pointer {
+                top: -12px;
+                border-left-width: 14px;
+                border-right-width: 14px;
+                border-top-width: 26px;
+            }
+            .pointer::after {
+                width: 10px;
+                height: 10px;
+                top: -32px;
+            }
+        }
+
+        @media (min-width: 520px) {
+            .wheel-wrapper {
+                width: 400px;
+                height: 400px;
+            }
+            .center-btn {
+                width: 80px;
+                height: 80px;
+                font-size: 26px;
+            }
+            .result {
+                font-size: 26px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 顶部工具栏 -->
+    <div class="toolbar">
+        <a class="back-link" href="../../index.html">← 返回</a>
+        <span class="title">🎡 幸运大转盘</span>
+        <span style="width:64px"></span>
+    </div>
+
+    <!-- 转盘 -->
+    <div class="wheel-wrapper">
+        <div class="pointer"></div>
+        <canvas id="wheelCanvas"></canvas>
+        <button class="center-btn" id="spinBtn">GO</button>
+    </div>
+
+    <!-- 结果 -->
+    <div class="result" id="resultDisplay">点击 GO 试试手气！</div>
+
+    <!-- 奖项列表 -->
+    <div class="prize-list">
+        <div class="prize-list-title">📋 奖项列表（点击可编辑）</div>
+        <div class="prize-grid" id="prizeGrid"></div>
+    </div>
+
+    <script>
+        // ============================================================
+        //  数据
+        // ============================================================
+        const SEG_COUNT = 8;
+        const COLORS = [
+            '#FF4757', // 红
+            '#FF6348', // 橙
+            '#FFC312', // 黄
+            '#2ED573', // 绿
+            '#1E90FF', // 青
+            '#3742FA', // 蓝
+            '#A29BFE', // 紫
+            '#FF6B81', // 粉
+        ];
+        const DARK_TEXT = '#2d3436';
+        const LIGHT_TEXT = '#fff';
+
+        const defaultPrizes = [
+            { emoji: '🎁', name: '一等奖', reward: '超级玩具大礼包 🧸' },
+            { emoji: '🎉', name: '二等奖', reward: '精美卡通书包 🎒' },
+            { emoji: '🌟', name: '三等奖', reward: '彩色画笔套装 🖍️' },
+            { emoji: '🍭', name: '四等奖', reward: '美味零食礼盒 🍬' },
+            { emoji: '🎈', name: '五等奖', reward: '趣味贴纸一包 🌈' },
+            { emoji: '🍪', name: '六等奖', reward: '创意橡皮擦 🧼' },
+            { emoji: '🎀', name: '七等奖', reward: '卡通铅笔一支 ✏️' },
+            { emoji: '💫', name: '八等奖', reward: '鼓励奖·棒棒糖 🍭' },
+        ];
+
+        let prizes;
+
+        // ============================================================
+        //  DOM 引用
+        // ============================================================
+        const canvas = document.getElementById('wheelCanvas');
+        const ctx = canvas.getContext('2d');
+        const spinBtn = document.getElementById('spinBtn');
+        const resultDisplay = document.getElementById('resultDisplay');
+        const prizeGrid = document.getElementById('prizeGrid');
+
+        // ============================================================
+        //  状态
+        // ============================================================
+        let currentAngle = 0;       // 当前旋转弧度
+        let isSpinning = false;
+        let animId = null;
+
+        // ============================================================
+        //  Canvas 尺寸
+        // ============================================================
+        function resizeCanvas() {
+            const wrapper = canvas.parentElement;
+            const size = wrapper.clientWidth;
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = size * dpr;
+            canvas.height = size * dpr;
+            canvas.style.width = size + 'px';
+            canvas.style.height = size + 'px';
+            ctx.scale(dpr, dpr);
+            drawWheel(0);
+        }
+
+        // ============================================================
+        //  绘制转盘
+        // ============================================================
+        function drawWheel(rotation) {
+            const size = canvas.width / (window.devicePixelRatio || 1);
+            const cx = size / 2;
+            const cy = size / 2;
+            const radius = size / 2 - 4;
+            const segAngle = (Math.PI * 2) / SEG_COUNT;
+
+            ctx.clearRect(0, 0, size, size);
+
+            // 每个扇区初始偏移，使第 0 个扇区居中在顶部
+            const startOffset = -Math.PI / 2 - segAngle / 2;
+
+            for (let i = 0; i < SEG_COUNT; i++) {
+                const start = startOffset + rotation + i * segAngle;
+                const end = start + segAngle;
+
+                // 画扇形
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                ctx.arc(cx, cy, radius, start, end);
+                ctx.closePath();
+                ctx.fillStyle = COLORS[i];
+                ctx.fill();
+
+                // 边线
+                ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // 文字
+                const midAngle = start + segAngle / 2;
+                const textRadius = radius * 0.62;
+                const tx = cx + Math.cos(midAngle) * textRadius;
+                const ty = cy + Math.sin(midAngle) * textRadius;
+
+                ctx.save();
+                ctx.translate(tx, ty);
+                ctx.rotate(midAngle + Math.PI / 2);
+
+                // 根据颜色亮度选择文字颜色
+                const bright = getBrightness(COLORS[i]);
+                ctx.fillStyle = bright > 180 ? DARK_TEXT : LIGHT_TEXT;
+
+                ctx.font = `bold ${radius * 0.09}px Nunito, sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                // 奖品文字
+                const label = prizes[i].emoji + ' ' + prizes[i].name;
+                // 如果文字太长，缩小字号
+                const maxWidth = radius * 0.48;
+                let fontSize = radius * 0.09;
+                ctx.font = `bold ${fontSize}px Nunito, sans-serif`;
+                while (ctx.measureText(label).width > maxWidth && fontSize > 10) {
+                    fontSize -= 1;
+                    ctx.font = `bold ${fontSize}px Nunito, sans-serif`;
+                }
+                ctx.fillText(label, 0, 0);
+                ctx.restore();
+            }
+
+            // 外圈装饰
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // 内圈装饰圆点
+            const dotRadius = radius * 0.14;
+            for (let i = 0; i < SEG_COUNT; i++) {
+                const a = startOffset + rotation + i * segAngle + segAngle / 2;
+                const dx = cx + Math.cos(a) * (radius - 10);
+                const dy = cy + Math.sin(a) * (radius - 10);
+                ctx.beginPath();
+                ctx.arc(dx, dy, 4, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255,255,255,0.6)';
+                ctx.fill();
+            }
+        }
+
+        // 计算颜色亮度
+        function getBrightness(hex) {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            return r * 0.299 + g * 0.587 + b * 0.114;
+        }
+
+        // ============================================================
+        //  获取指针实际指向的扇区索引
+        // ============================================================
+        function getSegmentAtTop(angle) {
+            const segAngle = (Math.PI * 2) / SEG_COUNT;
+            // 归一化到 [0, 2π)
+            const norm = ((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+            // 指针固定在顶部 (-π/2), 扇区 0 在 rotation=0 时位于顶部
+            // 扇区 i 中心: startOffset + rotation + i*segAngle + segAngle/2 = -π/2 + rotation + i*segAngle
+            // 指针位置: -π/2, 满足 -π/2 + rotation + i*segAngle ≡ -π/2 (mod 2π)
+            // => rotation + i*segAngle ≡ 0 => i ≡ -rotation/segAngle (mod SEG_COUNT)
+            let i = -norm / segAngle;
+            i = ((Math.round(i) % SEG_COUNT) + SEG_COUNT) % SEG_COUNT;
+            return Math.floor(i);
+        }
+
+        // ============================================================
+        //  旋转动画
+        // ============================================================
+        function spin() {
+            if (isSpinning) return;
+            isSpinning = true;
+            spinBtn.disabled = true;
+            spinBtn.textContent = '...';
+            resultDisplay.textContent = '';
+            resultDisplay.classList.remove('highlight');
+
+            // 随机确定最终停在哪个扇区
+            const targetIndex = Math.floor(Math.random() * SEG_COUNT);
+            const segAngle = (Math.PI * 2) / SEG_COUNT;
+
+            // 计算旋转后目标扇区中心对准顶部的角度
+            // 扇区 i 中心在 rotation = -i*segAngle (mod 2π) 时对准顶部
+            const baseTarget = -targetIndex * segAngle;
+            // 在扇区内加随机偏移让停止位置不那么死板
+            const randomOffset = (Math.random() - 0.5) * segAngle * 0.6;
+            // 归一化到 [0, 2π)
+            const normTarget = ((baseTarget + randomOffset) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
+
+            // 至少转 5 圈，再从当前位置过渡到目标角度
+            const fullSpins = 5 * Math.PI * 2 + Math.random() * Math.PI * 2;
+            const currentNorm = ((currentAngle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+            let delta = normTarget - currentNorm;
+            if (delta < 0) delta += Math.PI * 2;
+            const targetAngle = currentAngle + fullSpins + delta;
+
+            const startAngle = currentAngle;
+            const totalDelta = targetAngle - startAngle;
+            const duration = 4000 + Math.random() * 1000; // 4~5秒
+            let startTime = null;
+
+            function easeOut(t) {
+                return 1 - Math.pow(1 - t, 4);
+            }
+
+            function step(timestamp) {
+                if (!startTime) startTime = timestamp;
+                const elapsed = timestamp - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = easeOut(progress);
+
+                currentAngle = startAngle + totalDelta * eased;
+                drawWheel(currentAngle);
+
+                if (progress < 1) {
+                    animId = requestAnimationFrame(step);
+                } else {
+                    currentAngle = targetAngle;
+                    drawWheel(currentAngle);
+                    onStop();
+                }
+            }
+
+            animId = requestAnimationFrame(step);
+        }
+
+        function onStop(/* segmentIndex */) {
+            isSpinning = false;
+            spinBtn.disabled = false;
+            spinBtn.textContent = 'GO';
+
+            // 根据指针实际指向的扇区确定奖项（更准确）
+            const actualIndex = getSegmentAtTop(currentAngle);
+            const prize = prizes[actualIndex];
+            resultDisplay.textContent = `🎉 恭喜获得：${prize.emoji} ${prize.name}！奖励：${prize.reward}`;
+            resultDisplay.classList.add('highlight');
+        }
+
+        // ============================================================
+        //  奖项列表渲染
+        // ============================================================
+        function renderPrizeList() {
+            prizeGrid.innerHTML = '';
+            prizes.forEach((prize, index) => {
+                const div = document.createElement('div');
+                div.className = 'prize-item';
+                div.innerHTML = `
+                    <span class="emoji">${prize.emoji}</span>
+                    <span class="name" data-index="${index}">${prize.name}</span>
+                    <span style="font-size:10px;color:#636e72;margin-top:2px;">${prize.reward}</span>
+                `;
+                const nameSpan = div.querySelector('.name');
+                // 点击编辑
+                nameSpan.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (isSpinning) return;
+                    const wasEditing = nameSpan.contentEditable === 'true';
+                    // 先关掉其他编辑
+                    document.querySelectorAll('.prize-item .name[contenteditable="true"]').forEach(el => {
+                        el.contentEditable = 'false';
+                        el.blur();
+                    });
+                    if (!wasEditing) {
+                        nameSpan.contentEditable = 'true';
+                        nameSpan.focus();
+                        // 选中全部文字
+                        const range = document.createRange();
+                        range.selectNodeContents(nameSpan);
+                        const sel = window.getSelection();
+                        sel.removeAllRanges();
+                        sel.addRange(range);
+                    }
+                });
+                // 保存编辑
+                nameSpan.addEventListener('blur', () => {
+                    nameSpan.contentEditable = 'false';
+                    const newName = nameSpan.textContent.trim();
+                    if (newName && newName !== prizes[index].name) {
+                        prizes[index].name = newName;
+                        drawWheel(currentAngle);
+                    } else {
+                        nameSpan.textContent = prizes[index].name;
+                    }
+                });
+                nameSpan.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        nameSpan.blur();
+                    }
+                });
+                div.addEventListener('click', () => {
+                    // 如果点击的是背景区域，不触发
+                });
+                prizeGrid.appendChild(div);
+            });
+        }
+
+        // ============================================================
+        //  初始化
+        // ============================================================
+        function init() {
+            // 深拷贝默认奖项
+            prizes = defaultPrizes.map(p => ({ ...p }));
+
+            renderPrizeList();
+            resizeCanvas();
+
+            // 绑定旋转按钮
+            spinBtn.addEventListener('click', spin);
+            // 点击转盘也触发
+            canvas.addEventListener('click', spin);
+
+            // 窗口变化重绘
+            let resizeTimer;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    resizeCanvas();
+                }, 150);
+            });
+        }
+
+        // DOM 就绪
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>
